@@ -1,0 +1,64 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module hello ! in 
+    interface  ! in :hello
+        subroutine getgriddim(gfile,mgrid,nj,nk,nl) ! in :hello:testfTp.F
+            character*80 intent(in) :: gfile
+            integer intent(in) :: mgrid
+            integer intent(out) :: nj
+            integer intent(out) :: nk
+            integer intent(out) :: nl
+        end subroutine getgriddim
+        subroutine getgridcords(gfile,mgrid,nj,nk,nl,cp,cpn,nx,ny,xt,yt,zt) ! in :hello:testfTp.F
+            character*80 intent(in) :: gfile
+            integer intent(in) :: mgrid
+            integer intent(in) :: nj
+            integer intent(in) :: nk
+            integer intent(in) :: nl
+            integer intent(in) :: cp
+            integer intent(in) :: cpn
+            integer intent(in) :: nx
+            integer intent(in) :: ny
+            real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: xt
+            real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: yt
+            real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: zt
+        end subroutine getgridcords
+        subroutine readheader(qfile,mgrid,ngrid,nj,nk,nl,nq,nqc,refmach,alfa,rey,time,gaminf,tinf,beta,fsmach) ! in :hello:testfTp.F
+            character*80 intent(in) :: qfile
+            integer intent(in) :: mgrid
+            integer intent(out) :: ngrid
+            integer intent(out) :: nj
+            integer intent(out) :: nk
+            integer intent(out) :: nl
+            integer intent(out) :: nq
+            integer intent(out) :: nqc
+            real(kind=8) intent(out) :: refmach
+            real(kind=8) intent(out) :: alfa
+            real(kind=8) intent(out) :: rey
+            real(kind=8) intent(out) :: time
+            real(kind=8) intent(out) :: gaminf
+            real(kind=8) intent(out) :: tinf
+            real(kind=8) intent(out) :: beta
+            real(kind=8) intent(out) :: fsmach
+        end subroutine readheader
+        subroutine readq(qfile,ngrid,mgrid,nj,nk,nl,nq,cq,qt,nx,ny,cp,cpn) ! in :hello:testfTp.F
+            character*80 intent(in) :: qfile
+            integer intent(in) :: ngrid
+            integer intent(in) :: mgrid
+            integer intent(in) :: nj
+            integer intent(in) :: nk
+            integer intent(in) :: nl
+            integer intent(in) :: nq
+            integer intent(in) :: cq
+            real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: qt
+            integer intent(in) :: nx
+            integer intent(in) :: ny
+            integer intent(in) :: cp
+            integer intent(in) :: cpn
+        end subroutine readq
+    end interface 
+end python module hello
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
