@@ -61,7 +61,7 @@ class Convq(wx.Panel):
         return self.manual_text2.GetValue()
 
     def sel_file(self,event):
-	   wildcard = "All files (*.*)|*.*"
+	   wildcard = "All files (*)|*"
 	   dialog = wx.FileDialog(None, "Choose a file", os.getcwd(), "", wildcard, wx.OPEN)	
 	   if dialog.ShowModal() == wx.ID_OK:
             self.manual_text.SetValue(dialog.GetPath())

@@ -3,14 +3,14 @@
 
 python module p3dmod ! in 
     interface  ! in :p3dmod
-        subroutine getgriddim(gfile,mgrid,nj,nk,nl) ! in :p3dmod:testfTp.F
+        subroutine getgriddim(gfile,mgrid,nj,nk,nl) ! in :p3dmod:p3dmod.F
             character*180 intent(in) :: gfile
             integer intent(in) :: mgrid
             integer intent(out) :: nj
             integer intent(out) :: nk
             integer intent(out) :: nl
         end subroutine getgriddim
-        subroutine getgridcords(gfile,mgrid,nj,nk,nl,cp,cpn,nx,ny,xt,yt) ! in :p3dmod:testfTp.F
+        subroutine getgridcords(gfile,mgrid,nj,nk,nl,cp,cpn,nx,ny,xt,yt) ! in :p3dmod:p3dmod.F
             character*180 intent(in) :: gfile
             integer intent(in) :: mgrid
             integer intent(in) :: nj
@@ -23,7 +23,7 @@ python module p3dmod ! in
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: xt
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: yt
         end subroutine getgridcords
-        subroutine readheader(qfile,mgrid,ngrid,nj,nk,nl,nq,nqc,refmach,alfa,rey,time,gaminf,tinf,beta,fsmach) ! in :p3dmod:testfTp.F
+        subroutine readheader(qfile,mgrid,ngrid,nj,nk,nl,nq,nqc,refmach,alfa,rey,time,gaminf,tinf,beta,fsmach) ! in :p3dmod:p3dmod.F
             character*180 intent(in) :: qfile
             integer intent(in) :: mgrid
             integer intent(out) :: ngrid
@@ -41,7 +41,7 @@ python module p3dmod ! in
             real(kind=8) intent(out) :: beta
             real(kind=8) intent(out) :: fsmach
         end subroutine readheader
-        subroutine readq(qfile,ngrid,mgrid,nj,nk,nl,nq,cq,nx,ny,cp,cpn,qt) ! in :p3dmod:testfTp.F
+        subroutine readq(qfile,ngrid,mgrid,nj,nk,nl,nq,cq,nx,ny,cp,cpn,qt) ! in :p3dmod:p3dmod.F
             character*180 intent(in) :: qfile
             integer intent(in) :: ngrid
             integer intent(in) :: mgrid
@@ -56,7 +56,19 @@ python module p3dmod ! in
             integer intent(in) :: cpn
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: qt
         end subroutine readq
-        subroutine stretch_norm(x,y,stretch,nx,ny,xstr,ystr) ! in :p3dmod:testfTp.F
+        subroutine readdiffhead(qfile,nj,nk) ! in :p3dmod:p3dmod.F
+            character*180 intent(in) :: qfile
+            integer intent(out) :: nj
+            integer intent(out) :: nk
+        end subroutine readdiffhead
+        subroutine readdiffq(qfile,nx,ny,cq,qout) ! in :p3dmod:p3dmod.F
+            character*180 intent(in) :: qfile
+            integer intent(in) :: nx
+            integer intent(in) :: ny
+            integer intent(in) :: cq
+            real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: qout
+        end subroutine readdiffq
+        subroutine stretch_norm(x,y,stretch,nx,ny,xstr,ystr) ! in :p3dmod:p3dmod.F
             real(kind=8) dimension(nx,ny),intent(in) :: x
             real(kind=8) dimension(nx,ny),intent(in),depend(nx,ny) :: y
             integer intent(in) :: stretch
@@ -65,7 +77,7 @@ python module p3dmod ! in
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: xstr
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: ystr
         end subroutine stretch_norm
-        subroutine readqvel(qfile,ngrid,mgrid,nj,nk,nl,nq,nx,ny,cp,cpn,u,v) ! in :p3dmod:testfTp.F
+        subroutine readqvel(qfile,ngrid,mgrid,nj,nk,nl,nq,nx,ny,cp,cpn,u,v) ! in :p3dmod:p3dmod.F
             character*180 intent(in) :: qfile
             integer intent(in) :: ngrid
             integer intent(in) :: mgrid
