@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+rm p3dmod.pyf 
+f2py -h p3dmod.pyf -m p3dmod p3dmod.F
+f2py -c p3dmod.pyf p3dmod.F
