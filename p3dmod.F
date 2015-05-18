@@ -159,7 +159,7 @@
       character(180),intent(in) :: qfile
       integer,intent(in) :: nx,ny,cq
       real(kind=8),dimension(nx,ny),intent(out) :: qout
-      real(kind=8),dimension(nx,ny,3) :: qt
+      real(kind=8),dimension(nx,ny,6) :: qt
 
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
       read(1) ! skip header

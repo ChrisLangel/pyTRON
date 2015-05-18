@@ -20,6 +20,7 @@ import pylab
 from pylab import arange, meshgrid, contourf, quiver, plot
 
 
+
 class GraphFrame(wx.Frame):
     """ The main frame of the application """
 
@@ -47,6 +48,8 @@ class GraphFrame(wx.Frame):
         
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
+	
+
         self.redraw_timer.Start(100)
 
     def create_menu(self):
@@ -67,6 +70,7 @@ class GraphFrame(wx.Frame):
         self.init_contour()
         self.boundary_layer()
         self.canvas2           = FigCanvas(self.panel, -1, self.fig1)
+	self.fig1.canvas.mpl_connect('scroll_event', self.onscroll)
         self.canvas3           = FigCanvas(self.panel, -1, self.fig2)
         self.xmin_control      = BoundControlBox(self.panel, -1, "X min", 0)
         self.xmax_control      = BoundControlBox(self.panel, -1, "X max", 1)
@@ -440,9 +444,9 @@ class GraphFrame(wx.Frame):
            self.get_c_plane(self)                   
         # If we need to reload the grid coordinates
         if (self.newgrid):
-            self.X, self.Y = getgridcords(self.grid,self.gnum,self.njind,
+            self.X, self.Y = getgridcords( self.grid,self.gnum,self.njind,
                                            self.nkind,self.nlind,self.cp,
-                                           self.cpn,self.nx,self.ny)
+                                           self.cpn,self.nx,self.ny )
             self.gminx = np.amin(self.X)
             self.gmaxx = np.amax(self.X)
             self.gminy = np.amin(self.Y)
@@ -491,7 +495,7 @@ class GraphFrame(wx.Frame):
         # Write information about the Mach #, AoA, Rey #, etc
         self.ref_mach.SetLabel( ''.join([' Mach: ', str(self.refmach)]) )
         self.Alpha.SetLabel( ''.join(['Angle of Attach: ', str(self.alpha)]) )
-        self.Rey.SetLabel( ''.join(['  Reynolds #: ', str(self.rey)]) )
+        self.Rey.SetLabel(   ''.join(['  Reynolds #: ', str(self.rey)]) )
         self.Njind.SetLabel( ''.join(['  J-dim:  ', str(self.njind)]) )
         self.Nkind.SetLabel( ''.join(['    K-dim:  ', str(self.nkind)]) )
         self.Nlind.SetLabel( ''.join(['     L-dim:  ', str(self.nlind)]) )
@@ -603,6 +607,31 @@ class GraphFrame(wx.Frame):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.on_update_button(event)
 
+    def onscroll( self, event ):        
+        print "Scroll"
+        scale = 1.15 # How fast we want to zoom in and out 
+        if event.button == 'down':
+            factor = 1/scale
+        elif event.button == 'up':
+            factor = scale
+            
+        curr_xlim = self.axes2.get_xlim()
+        curr_ylim = self.axes2.get_ylim()
+    
+        new_width = (curr_xlim[1]-curr_xlim[0])*factor
+        new_height= (curr_ylim[1]-curr_ylim[0])*factor
+    
+        relx = (curr_xlim[1]-event.xdata)/(curr_xlim[1]-curr_xlim[0])
+        rely = (curr_ylim[1]-event.ydata)/(curr_ylim[1]-curr_ylim[0])
+    
+        self.axes2.set_xlim([event.xdata-new_width*(1-relx),
+                    event.xdata+new_width*(relx)])
+        self.axes2.set_ylim([event.ydata-new_height*(1-rely),
+                            event.ydata+new_height*(rely)])
+        self.canvas2.draw()
+
+
+
 
     def boundary_layer(self):
         self.dpi3 = 102
@@ -663,7 +692,9 @@ class GraphFrame(wx.Frame):
         H     = dispth/momth
 #        print str(dispth)
 #        print str(momth)
-#        print str(H)
+#        print str(H) ##################################################3
+########################################################################
+        momth = momth*self.rey 
         shape = round(H,4)
         self.shape_label.SetLabel( ''.join(['H (Shape Factor) =   ', str(shape)]) )
         momthick = round(momth,8)
