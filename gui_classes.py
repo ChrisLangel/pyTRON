@@ -185,9 +185,9 @@ class QvarBox(wx.Panel):
         wx.Panel.__init__(self, parent, ID)
        
         qvars = [ 'Density' , 'Streamwise (u) Velocity' , 'Spanwise (v) Velocity' , 'Normal (w) Velocity',
-                  'k (SST) ' , 'w (SST) ' , 'Intermitency (SST_LM)' , 'RE_thetat (SST_LM)',
+                  'q5', 'q6','k (SST) ' , 'w (SST) ' , 'Intermitency (SST_LM)' , 'RE_thetat (SST_LM)',
                   'A_r (SST_LM_RA)', 'Pressure', 'Velocity Magnitude', 'Velocity Vectors' ]
-        self.qvarnum = [ '1' , '2', '3' , '4', '7', '8' ,'9', '10','11', '15', '16', '17' ] 
+        self.qvarnum = [ '1', '2', '3', '4', '5', '6', '7', '8' ,'9', '10','11', '15', '16', '17' ] 
         self.cb = wx.ComboBox(self, choices=qvars , style=wx.CB_READONLY) 
 
         self.num = int(self.qvarnum[1])  

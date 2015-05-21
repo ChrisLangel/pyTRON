@@ -375,7 +375,7 @@ class GraphFrame(wx.Frame):
                 self.lmax == self.l_index_control.manual_value2() and
                 self.selvar == self.selectq_control.num           and
                 self.qfile  == self.qfile_control.manual_value()  and
-                self.strk == self.cb_stretch.IsChecked()             and
+                self.strk == self.cb_stretch.IsChecked()          and
                 self.flat == self.flatten.IsChecked()             and
                 self.kstretch_fac == self.k_str.GetValue()        and
                 self.res  ==self.res_control.GetValue()           and
@@ -431,43 +431,50 @@ class GraphFrame(wx.Frame):
 	   if self.filetype == 'p3d': 
               self.ngrid,self.njind,self.nkind,self.nlind,self.nq,self.nqc,\
               self.refmach,self.alpha,self.rey,self.time,self.gaminf,self.tinf, \
-              self.beta,self.fsmach = readheader(self.qfile,self.gnum)
+              self.beta,self.fsmach,ioerr = readheader(self.qfile,self.gnum)	
+	      if ioerr:
+		      self.newq = False
 	   elif self.filetype == 'diff':
-	      self.njind,self.nkind = readdiffhead(self.qfile)
-	      self.Q = readdiffq(self.qfile,self.njind,self.nkind,self.selvar)
+	      self.njind,self.nkind,self.nq,ioerr = readdiffhead(self.qfile)
+	      self.Q,ioerr = readdiffq(self.qfile,self.njind,self.nkind,self.nq,self.selvar)
 	      self.nlind = 3 #Assuming we have a 2-D grid here 
 	      self.refmach  = 99999
 	      self.alpha = 9999
 	      self.rey   = 9999
 	      self.ngrid = 1
+	      if ioerr:
+		      self.newq = False
 	   self.check_max() 
            self.get_c_plane(self)                   
         # If we need to reload the grid coordinates
         if (self.newgrid):
-            self.X, self.Y = getgridcords( self.grid,self.gnum,self.njind,
-                                           self.nkind,self.nlind,self.cp,
-                                           self.cpn,self.nx,self.ny )
-            self.gminx = np.amin(self.X)
-            self.gmaxx = np.amax(self.X)
-            self.gminy = np.amin(self.Y)
-            self.gmaxy = np.amax(self.Y)                                      
-            self.newgrid = False 
+            self.X, self.Y,ioerr = getgridcords( self.grid,self.gnum,self.njind,
+                                                 self.nkind,self.nlind,self.cp,
+                                                 self.cpn,self.nx,self.ny )
+	    if not ioerr:
+	       self.gminx = np.amin(self.X)
+               self.gmaxx = np.amax(self.X)
+               self.gminy = np.amin(self.Y)
+               self.gmaxy = np.amax(self.Y)                                      
+               self.newgrid = False
+	    else:
+               self.change = False
          # If we need to reload a q-var 
         if (self.newq):
 	    if self.filetype == 'p3d':
                # Special case of velocity vectors 
                if self.selvar == 17:
                    qnum = 2
-                   self.u,self.v =readqvel(self.qfile,self.ngrid,self.gnum,
+                   self.u,self.v, =readqvel(self.qfile,self.ngrid,self.gnum,
                	                  self.njind,self.nkind,self.nlind,self.nq,
                  	               self.nx,self.ny,self.cp,self.cpn)
                else:
                    qnum = self.selvar        
-               self.Q = readq(self.qfile,self.ngrid,self.gnum,self.njind,
-                           self.nkind,self.nlind,self.nq,qnum, 
-                           self.nx,self.ny,self.cp,self.cpn)
-	    self.minz = np.amin(self.Q)
-            self.maxz = np.amax(self.Q)
+               self.Q,ioerr = readq(self.qfile,self.ngrid,self.gnum,self.njind,
+                              self.nkind,self.nlind,self.nq,qnum, 
+                              self.nx,self.ny,self.cp,self.cpn)
+	       if ioerr:
+		   self.change = False 
             self.newq = False
         if (self.update == False or self.change == True):
             self.draw_update()
@@ -500,18 +507,14 @@ class GraphFrame(wx.Frame):
         self.Nkind.SetLabel( ''.join(['    K-dim:  ', str(self.nkind)]) )
         self.Nlind.SetLabel( ''.join(['     L-dim:  ', str(self.nlind)]) )
 
-        
-	# Get the range of the q-var for the contour plot
-        res = self.res_control.num 
-        sp = (self.maxz - self.minz)/res
-        if (self.minz >= 0):
-            levels = arange((self.minz-self.minz*.1),self.maxz*1.05, sp )
-        else:
-            levels = arange((self.minz+self.minz*.1),self.maxz*1.05, sp ) 
-	
-	self.Xplt = self.X
+        # Allow user to lower indices that are plotted 
+	jmax = self.j_index_control.manual_text2.GetValue()
+	kmax = self.k_index_control.manual_text2.GetValue()
+	jmin = self.j_index_control.manual_text1.GetValue()
+	kmin = self.k_index_control.manual_text1.GetValue()
+        self.Qplt = self.Q	
+        self.Xplt = self.X 
         self.Yplt = self.Y 
-        self.axes2.cla() 
         if self.cb_stretch.IsChecked():
             stretch = int(self.k_str.GetValue())
             lj = len(self.X[:,0])
@@ -519,7 +522,31 @@ class GraphFrame(wx.Frame):
             self.Xplt,self.Yplt = stretch_norm(self.X,self.Y,stretch,lj,lk)
             self.Xplt = np.array(self.Xplt)
             self.Yplt = np.array(self.Yplt)
-        cplot = self.axes2.contourf(self.Xplt,self.Yplt,self.Q,levels)
+        if ((jmax < self.njind or jmin > 2) and self.update):
+		self.Xplt = self.X[jmin:jmax][:]
+		self.Yplt = self.Y[jmin:jmax][:]
+		self.Qplt = self.Q[jmin:jmax][:]
+        if ((kmax < self.nkind or kmin > 2) and self.update):
+	        self.Xtemp,self.Qtemp,self.Ytemp = [],[],[]
+		for i in range(len(self.Xplt)):
+	        	self.Xtemp.append(self.Xplt[i][kmin:kmax])
+		        self.Ytemp.append(self.Yplt[i][kmin:kmax])
+		        self.Qtemp.append(self.Qplt[i][kmin:kmax])
+	        self.Xplt = self.Xtemp
+             	self.Yplt = self.Ytemp
+	        self.Qplt = self.Qtemp 
+	# Get the range of the q-var for the contour plot
+	self.minz = np.amin(self.Qplt)
+        self.maxz = np.amax(self.Qplt)
+	res = self.res_control.num 
+        sp = (self.maxz - self.minz)/res
+        if (self.minz >= 0):
+            levels = arange((self.minz-self.minz*.1),self.maxz*1.05, sp )
+        else:
+            levels = arange((self.minz+self.minz*.1),self.maxz*1.05, sp ) 
+	
+        self.axes2.cla() 
+        cplot = self.axes2.contourf(self.Xplt,self.Yplt,self.Qplt,levels)
 	# Remove the old color bar, it is treated as a separate axis
 	self.fig1.delaxes(self.fig1.axes[1])
 	self.fig1.subplots_adjust(right=0.92)
@@ -608,7 +635,6 @@ class GraphFrame(wx.Frame):
             self.on_update_button(event)
 
     def onscroll( self, event ):        
-        print "Scroll"
         scale = 1.15 # How fast we want to zoom in and out 
         if event.button == 'down':
             factor = 1/scale

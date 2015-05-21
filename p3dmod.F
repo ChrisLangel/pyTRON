@@ -2,20 +2,26 @@
 !     This file contains a collection of fortran subroutines that will
 !     be converted into python modules
 
-      subroutine getgriddim(gfile,mgrid,nj,nk,nl) 
+      subroutine getgriddim(gfile,mgrid,nj,nk,nl,ioerr) 
       character(180), intent(in) :: gfile
       integer, intent(in) :: mgrid
       integer, intent(out) :: nj,nk,nl
-      
-      open(1,file=gfile,status='OLD', form='UNFORMATTED') 
-      read(1) ngrid
+      logical, intent(out) :: ioerr  
+
+      ioerr = .false.
+      open(1,file=gfile,status='OLD',form='UNFORMATTED',err=10) 
+      read(1,end=10,err=10) ngrid
       if (ngrid .eq. 1) then
-         read(1) nj,nk,nl
+         read(1,end=10,err=10) nj,nk,nl
       else
-         read(1) (nj,nk,nl,n=1,mgrid)
+         read(1,end=10,err=10) (nj,nk,nl,n=1,mgrid)
       end if
-      print *, nj,nk,nl
       close(1)
+      goto 20
+10    continue
+      close(1)
+      ioerr  = .true.
+20    continue
       end 
 
 !     We are including the parameters "nx" and "ny" to represent the
@@ -24,21 +30,23 @@
 !     "cpn" is the point in that plane held constant
 
       subroutine getgridcords(gfile,mgrid,nj,nk,nl,
-     &                        cp,cpn,nx,ny,xt,yt)
+     &                        cp,cpn,nx,ny,xt,yt,ioerr)
       character(180), intent(in) :: gfile
       integer,intent(in) :: mgrid,nj,nk,nl,nx,ny,cp,cpn
       real(kind=8),dimension(nx,ny),intent(out) :: xt,yt 
+      logical, intent(out) :: ioerr
       real(kind=8),dimension(nj,nk,nl) :: x,y,z
       integer :: i,jj,kk,ll
       
-      open(1,file=gfile, status='OLD', form='UNFORMATTED') 
-      read(1)
-      read(1)    
+      ioerr = .false.
+      open(1,file=gfile, status='OLD', form='UNFORMATTED',err=10) 
+      read(1,end=10,err=10)
+      read(1,end=10,err=10)    
       do i=1,mgrid-1
-         read(1) 
+         read(1,err=10,end=10) 
       end do 
 
-      read(1) (((x(jj,kk,ll),jj=1,nj),kk=1,nk),ll=1,nl),
+      read(1,err=10,end=10) (((x(jj,kk,ll),jj=1,nj),kk=1,nk),ll=1,nl),
      &        (((y(jj,kk,ll),jj=1,nj),kk=1,nk),ll=1,nl),
      &        (((z(jj,kk,ll),jj=1,nj),kk=1,nk),ll=1,nl)
 
@@ -57,77 +65,91 @@
          xt = y(cpn,:,:)
          yt = z(cpn,:,:)
       end if 
+      goto 20
+ 10   continue
+      close(1)  
+      ioerr = .true. 
+ 20   continue   
       end
 
 
       subroutine readheader(qfile,mgrid,ngrid,nj,nk,nl,nq,nqc, 
      &                      refmach,alfa,rey,time,gaminf,tinf,
-     &                      beta,fsmach) 
+     &                      beta,fsmach,ioerr) 
 
       character(180),intent(in) :: qfile
       integer,intent(in) :: mgrid
       integer, intent(out) :: ngrid,nj,nl,nk,nq,nqc 
       real(kind=8),intent(out) :: refmach,alfa,rey,time,gaminf,tinf,
-     &                             beta,fsmach 
+     &                             beta,fsmach
+      logical, intent(out) :: ioerr 
       integer :: njd,nkd,nld,n,igam
       real(kind=8) :: htinf,ht1,ht2,tvref,dtref
       real(kind=8),dimension(:),allocatable :: rgas
 
+      ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
-      read(1,err=30) nj,nk,nl
+      read(1,err=30,end=10) nj,nk,nl
       rewind(1)
       ngrid = 1 
       goto 50    
 30    rewind(1) 
-      read(1) ngrid  
+      read(1,err=10,end=10) ngrid  
 50    if (ngrid .eq. 1) then
-         read(1) nj,nk,nl,nq,nqc 
+         read(1,err=10,end=10) nj,nk,nl,nq,nqc 
       else
-         read(1) (nj,nk,nl,n=1,mgrid),
+         read(1,err=10,end=10) (nj,nk,nl,n=1,mgrid),
      &      (njd,nkd,nld,n=1,ngrid-mgrid),nq,nqc
       end if 
       do n = 1,mgrid-1
-         read(1)
-         read(1)
+         read(1,err=10,end=10)
+         read(1,err=10,end=10)
       end do 
       allocate( rgas(max(2,nqc)) )
-      read(1) refmach,alfa,rey,time,gaminf,beta,tinf,
+      read(1,err=10,end=10) refmach,alfa,rey,time,gaminf,beta,tinf,
      &        igam,htinf,ht1,ht2,rgas(1:max(2,nqc)),
      &        fsmach,tvref,dtref
 
       close(1)
+      goto 20
+10    continue
+      close(1)
+      ioerr = .true. 
+20    continue
       end
 
 
       subroutine readq(qfile,ngrid,mgrid,nj,nk,nl,nq,cq,
-     &                 nx,ny,cp,cpn,qt)
+     &                 nx,ny,cp,cpn,qt,ioerr)
       
       character(180),intent(in) :: qfile
       integer,intent(in) :: mgrid,ngrid,nj,nk,nl,nq,cq,
      &                      nx,ny,cp,cpn
       real(kind=8),dimension(nx,ny),intent(out) :: qt
+      logical, intent(out) :: ioerr
       real(kind=8),dimension(nj,nk,nl) :: q
       integer :: n      
       real(kind=8),dimension(nj,nk,nl,nq) :: tempq 
 
+      ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
 
 !     Skip all the header info       
       if (ngrid .eq. 1) then
-         read(1)
+         read(1,err=10,end=10)
       else 
-         read(1) 
-         read(1)
+         read(1,err=10,end=10) 
+         read(1,err=10,end=10)
       end if
       
       do n = 1,mgrid-1
-         read(1)
-         read(1) 
+         read(1,err=10,end=10)
+         read(1,err=10,end=10) 
       end do 
 
 !     Actually read the q array for the desired grid 
-      read(1) ! Skip header 
-      read(1) tempq 
+      read(1,err=10,end=10) ! Skip header 
+      read(1,err=10,end=10) tempq 
       q = tempq(:,:,:,cq)
 ! 
       if (cp .eq. 1) then
@@ -136,38 +158,55 @@
          qt = q(:,cpn,:) 
       else 
          qt = q(cpn,:,:)
-      end if 
-
+      end if  
       close(1)
+      goto 20
+ 10   continue 
+      close(1)
+      ioerr = .true.
+ 20   continue
       end 
 !
 !      
-      subroutine readdiffhead(qfile,nj,nk) 
+      subroutine readdiffhead(qfile,nj,nk,nq,ioerr) 
 
       character(180),intent(in) :: qfile
-      integer, intent(out) :: nj,nk
+      integer, intent(out) :: nj,nk,nq
+      logical, intent(out) :: ioerr
 
+      ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
-      read(1) nj,nk
+      read(1,err=10,end=10) nj,nk,nq
       close(1)
-
+      goto 20
+ 10   continue
+      close(1)
+      ioerr = .true.
+ 20   continue
       end
 
 
-      subroutine readdiffq(qfile,nx,ny,cq,qout)
+      subroutine readdiffq(qfile,nx,ny,nq,cq,qout,ioerr)
       
       character(180),intent(in) :: qfile
-      integer,intent(in) :: nx,ny,cq
+      integer,intent(in) :: nx,ny,nq,cq
       real(kind=8),dimension(nx,ny),intent(out) :: qout
-      real(kind=8),dimension(nx,ny,6) :: qt
+      logical, intent(out) :: ioerr
+      real(kind=8),dimension(nx,ny,nq) :: qt
 
+      ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
-      read(1) ! skip header
+      read(1,err=10,end=10) ! skip header
 
 !     Actually read the q array for the desired grid 
-      read(1) qt
+      read(1,err=10,end=10) qt
       qout = qt(:,:,cq) 
       close(1)
+      goto 20
+ 10   continue 
+      close(1) 
+      ioerr = .true.
+ 20   continue 
       end
 
 
