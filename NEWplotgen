@@ -71,6 +71,9 @@ class GraphFrame(wx.Frame):
         self.boundary_layer()
         self.canvas2           = FigCanvas(self.panel, -1, self.fig1)
 	self.fig1.canvas.mpl_connect('scroll_event', self.onscroll)
+	self.legend_adj        = wx.Slider(self.panel, -1, 1000, 0, 1000, size = (-1,250),
+			             style=wx.SL_VERTICAL | wx.SL_AUTOTICKS | wx.SL_LABELS )
+	self.legend_adj.SetTickFreq(5,1) 
         self.canvas3           = FigCanvas(self.panel, -1, self.fig2)
         self.xmin_control      = BoundControlBox(self.panel, -1, "X min", 0)
         self.xmax_control      = BoundControlBox(self.panel, -1, "X max", 1)
@@ -149,9 +152,13 @@ class GraphFrame(wx.Frame):
                                     style=wx.ALIGN_RIGHT)
         self.Bind(wx.EVT_CHECKBOX, self.on_flatten, self.flatten)
 
+        self.fix_axlim = wx.Button(self.panel, -1, "Set to Current")
+	self.fix_axlim.Bind(wx.EVT_BUTTON,self.set_curlim) 
 
-
-        self.l_sel = wx.RadioButton(self.panel, -1,
+        self.allauto = wx.Button(self.panel, -1, "All Auto")
+	self.allauto.Bind(wx.EVT_BUTTON,self.set_allauto) 
+        
+	self.l_sel = wx.RadioButton(self.panel, -1,
             label="Const-L ", style=wx.RB_GROUP)
         self.j_sel = wx.RadioButton(self.panel, -1,
             label="Const-J ")
@@ -201,10 +208,17 @@ class GraphFrame(wx.Frame):
         self.hbox6 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox6.Add(self.ymin_control, border=5, flag=wx.ALL)
         self.hbox6.Add(self.ymax_control, border=5, flag=wx.ALL)
+ 
 
+        self.axmod = wx.BoxSizer(wx.HORIZONTAL)
+        self.axmod.Add(self.fix_axlim, border=5, flag=wx.ALIGN_LEFT | wx.TOP )
+        self.axmod.Add(self.allauto, border=5, flag=wx.ALIGN_LEFT | wx.TOP )
+          
+	  
         self.hbox7 = wx.BoxSizer(wx.VERTICAL)
         self.hbox7.Add(self.hbox5, 0, flag=wx.ALIGN_LEFT | wx.TOP)
         self.hbox7.Add(self.hbox6, 0, flag=wx.ALIGN_LEFT | wx.TOP)
+        self.hbox7.Add(self.axmod, 0, flag=wx.ALIGN_CENTER | wx.TOP)
 
         self.hbox2 = wx.BoxSizer(wx.VERTICAL)
         self.hbox2.Add(self.grid_file_control, border=5, flag=wx.ALL)
@@ -258,8 +272,12 @@ class GraphFrame(wx.Frame):
         self.hbox4.Add(self.canvas3, 1, flag=wx.ALIGN_LEFT | wx.TOP | wx.GROW)
 
 
+        self.figbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.figbox.Add(self.canvas2, 10, flag=wx.LEFT | wx.TOP | wx.GROW)
+        self.figbox.Add(self.legend_adj, 1, flag=wx.RIGHT | wx.TOP )
+
         self.vbox = wx.BoxSizer(wx.VERTICAL)
-        self.vbox.Add(self.canvas2, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
+        self.vbox.Add(self.figbox, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
         self.vbox.Add(self.hbox1, 0, flag=wx.ALIGN_LEFT | wx.TOP)
         self.vbox.Add(self.hbox4, 0, flag=wx.ALIGN_LEFT | wx.TOP)
 
@@ -536,8 +554,9 @@ class GraphFrame(wx.Frame):
              	self.Yplt = self.Ytemp
 	        self.Qplt = self.Qtemp 
 	# Get the range of the q-var for the contour plot
+	scale     = float(self.legend_adj.GetValue())/1000.0
 	self.minz = np.amin(self.Qplt)
-        self.maxz = np.amax(self.Qplt)
+        self.maxz = np.amax(self.Qplt)*scale
 	res = self.res_control.num 
         sp = (self.maxz - self.minz)/res
         if (self.minz >= 0):
@@ -657,7 +676,24 @@ class GraphFrame(wx.Frame):
         self.canvas2.draw()
 
 
+    def set_curlim(self,event):
+    	curr_xlim = self.axes2.get_xlim() 
+        curr_ylim = self.axes2.get_ylim()
+	self.xmax_control.manual_text.SetValue(str(curr_xlim[1]))
+	self.xmin_control.manual_text.SetValue(str(curr_xlim[0]))
+	self.ymax_control.manual_text.SetValue(str(curr_ylim[1]))
+	self.ymin_control.manual_text.SetValue(str(curr_ylim[0]))
+	self.xmax_control.radio_manual.SetValue(True)
+	self.xmin_control.radio_manual.SetValue(True)
+	self.ymax_control.radio_manual.SetValue(True)
+	self.ymin_control.radio_manual.SetValue(True)
 
+
+    def set_allauto(self,event):
+	self.xmax_control.radio_auto.SetValue(True)
+	self.xmin_control.radio_auto.SetValue(True)
+	self.ymax_control.radio_auto.SetValue(True)
+	self.ymin_control.radio_auto.SetValue(True)
 
     def boundary_layer(self):
         self.dpi3 = 102
@@ -666,7 +702,7 @@ class GraphFrame(wx.Frame):
         self.axes3.set_axis_bgcolor('white')
         self.x = arange(0,10,.5)
         self.y = arange(0,10,.5)
-        self.X, self.Y = pylab.meshgrid(self.x,self.y)
+	self.X, self.Y = pylab.meshgrid(self.x,self.y)
         self.Z, self.Zt = pylab.meshgrid(self.x,self.y)
 
         if not self.update:
