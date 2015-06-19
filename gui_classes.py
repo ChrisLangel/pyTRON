@@ -213,7 +213,7 @@ class ResBox(wx.Panel):
        
         res = [ 'Very Low', 'Low', 'Medium', 'High', 'Very High' ]
         self.resnum = [ '30', '60' , '100' , '140' , '250' ] 
-        self.cb = wx.ComboBox(self, choices=res, style=wx.CB_READONLY) 
+        self.cb = wx.ComboBox(self, choices=res, size=(110,-1), style=wx.CB_READONLY) 
 
         self.num = int(self.resnum[1])  
         self.cb.Bind(wx.EVT_COMBOBOX, self.OnSelect)
