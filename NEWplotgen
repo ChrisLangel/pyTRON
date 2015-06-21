@@ -74,7 +74,7 @@ class GraphFrame(wx.Frame):
         self.canvas2           = FigCanvas(self.panel, -1, self.fig1)
         self.fig1.canvas.mpl_connect('scroll_event', self.onscroll)
         self.legend_adj        = wx.Slider(self.panel, -1, 1000, 0, 1000, size = (-1,250),
-			              style=wx.SL_VERTICAL | wx.SL_AUTOTICKS | wx.SL_LABELS )
+			                style=wx.SL_VERTICAL | wx.SL_AUTOTICKS | wx.SL_LABELS )
         self.legend_adj.SetTickFreq(5,1) 
         self.canvas3           = FigCanvas(self.panel, -1, self.fig2)
         self.xmin_control      = BoundControlBox(self.panel, -1, "X min", 0)
@@ -110,11 +110,12 @@ class GraphFrame(wx.Frame):
 
         self.update_button = wx.Button(self.panel, -1, "Update")
 	self.filesel     =  wx.ComboBox( self.panel, choices=['p3d','diff'],
-                                      size = (100,-1),style =wx.CB_READONLY )
+                                         size = (100,-1),style =wx.CB_READONLY )
         self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
  #       self.Bind(wx.EVT_UPDATE_UI, self.on_update_update_button, self.update_button)
  
-        self.saved_views  = wx.ComboBox(self.panel, choices=[''], size=(150,-1), style=wx.CB_READONLY)
+        self.saved_views  = wx.ComboBox(self.panel, choices=[''],
+			                size=(150,-1), style=wx.CB_READONLY)
         self.sview_button = wx.Button(self.panel, -1, "Save View")
         self.lview_button = wx.Button(self.panel, -1, "Load View")
         self.sview_button.Bind(wx.EVT_BUTTON, self.save_current )
@@ -219,6 +220,7 @@ class GraphFrame(wx.Frame):
 
         self.axmod = wx.BoxSizer(wx.HORIZONTAL)
         self.axmod.Add(self.fix_axlim, border=5, flag=wx.ALIGN_LEFT | wx.TOP )
+        self.axmod.AddSpacer(10)
         self.axmod.Add(self.allauto, border=5, flag=wx.ALIGN_LEFT | wx.TOP )
           
 	  
@@ -376,6 +378,8 @@ class GraphFrame(wx.Frame):
         self.Z, self.Zt = pylab.meshgrid(self.x,self.y)
         self.dpi2       = 101
         self.fig1       = Figure((3.0, 3.0), dpi=self.dpi2)
+        self.fig1.subplots_adjust(right=1.0)
+        self.fig1.subplots_adjust(left=0.075)
         self.axes2      = self.fig1.add_subplot(111)
         self.axes2.set_axis_bgcolor('white')
         if not self.update:
@@ -597,7 +601,7 @@ class GraphFrame(wx.Frame):
         cplot = self.axes2.contourf(self.Xplt,self.Yplt,self.Qplt,levels)
 	# Remove the old color bar, it is treated as a separate axis
 	self.fig1.delaxes(self.fig1.axes[1])
-	self.fig1.subplots_adjust(right=0.92)
+	self.fig1.subplots_adjust(right=1.0)
 	self.fig1.colorbar(cplot) 
         
         if (self.selvar == 17):
@@ -606,6 +610,7 @@ class GraphFrame(wx.Frame):
                              width=.001)
         # This is a pretty good default window size
         self.check_auto_axis(-0.25,1.25,-0.25,0.25)
+        self.check_max()
         self.canvas2.draw()
         
         if (self.cb_grid.IsChecked() and self.redrawgrid):
@@ -730,6 +735,7 @@ class GraphFrame(wx.Frame):
         self.numsaved = self.numsaved + 1 
         curname = ''.join(['Saved_Frame_', str(self.numsaved)])
         self.saved_views.Append(curname)
+        self.saved_views.SetValue(curname)
         viewdict = {}
         self.set_curlim(event)
         # load all the current attributes into a dictionary 
@@ -753,17 +759,21 @@ class GraphFrame(wx.Frame):
         viewdict['xmax']  = self.xmax_control.manual_text.GetValue()
         viewdict['ymin']  = self.ymin_control.manual_text.GetValue()
         viewdict['ymax']  = self.ymax_control.manual_text.GetValue()
+        viewdict['jcon']  = self.j_sel.GetValue()
+        viewdict['kcon']  = self.k_sel.GetValue()
+        viewdict['lcon']  = self.l_sel.GetValue()
         viewdict['strk']  = self.cb_stretch.IsChecked()
         viewdict['ksf']   = self.k_str.GetValue()
         viewdict['res']   = self.res_control.GetValue()
-        viewdict['filet'] = self.filesel.GetValue()         
+        viewdict['filet'] = self.filesel.GetValue()     
+        viewdict['showg'] = self.cb_grid.GetValue()
         viewdict['cpt']   = self.cp
         viewdict['cpnt']  = self.cpn 
         self.viewhist[curname] = viewdict
         
 
     def load_view(self, event):
-        curname = self.saved_views.GetValue() 
+        curname  = self.saved_views.GetValue() 
         viewdict = self.viewhist[curname]        
         self.j_index_control.manual_text1.SetValue(viewdict['jmin'])
         self.j_index_control.manual_text2.SetValue(viewdict['jmax'])
@@ -783,14 +793,18 @@ class GraphFrame(wx.Frame):
         self.xmax_control.manual_text.SetValue(viewdict['xmax'])
         self.ymin_control.manual_text.SetValue(viewdict['ymin'])
         self.ymax_control.manual_text.SetValue(viewdict['ymax'])
+        self.j_sel.SetValue(viewdict['jcon'])
+        self.k_sel.SetValue(viewdict['kcon'])
+        self.l_sel.SetValue(viewdict['lcon'])
         self.cb_stretch.SetValue(viewdict['strk'])
         self.k_str.SetValue(viewdict['ksf'])
         self.filesel.SetValue(viewdict['filet'])
+        self.cb_grid.SetValue(viewdict['showg'])
         self.cp  = viewdict['cpt'] 
         self.cpn = viewdict['cpnt']
         self.selectq_control.cb.SetStringSelection(viewdict['vname'])
         self.on_update_button(event)
-        
+
 
 # Boundary Layer functions ------------------------------------------------
     def boundary_layer(self):
