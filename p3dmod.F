@@ -120,15 +120,17 @@
 
 
       subroutine readq(qfile,ngrid,mgrid,nj,nk,nl,nq,cq,
-     &                 nx,ny,cp,cpn,qt,ioerr)
+     &                 nx,ny,cp,cpn,gaminf,mach,qt,ioerr)
       
       character(180),intent(in) :: qfile
       integer,intent(in) :: mgrid,ngrid,nj,nk,nl,nq,cq,
      &                      nx,ny,cp,cpn
+      real(kind=8), intent(in) :: gaminf,mach
       real(kind=8),dimension(nx,ny),intent(out) :: qt
       logical, intent(out) :: ioerr
-      real(kind=8),dimension(nj,nk,nl) :: q
-      integer :: n      
+      integer :: n,j,k,l     
+      real(kind=8) :: u,v,w,vsq,e,pinf,qinf,rqinf,p,rho
+      real(kind=8),dimension(nj,nk,nl) :: q  
       real(kind=8),dimension(nj,nk,nl,nq) :: tempq 
 
       ioerr = .false.
@@ -150,15 +152,48 @@
 !     Actually read the q array for the desired grid 
       read(1,err=10,end=10) ! Skip header 
       read(1,err=10,end=10) tempq 
-      q = tempq(:,:,:,cq)
-! 
+      if (cq .lt. 15) then 
+         q = tempq(:,:,:,cq)
+      else if (cq .eq. 15) then
+         do j = 1,nj
+            do k = 1,nk
+               do l = 1,nl
+                  pinf  = 1./gaminf 
+                  qinf  = 0.5*mach**2
+                  rqinf = 1./qinf 
+                  rho   = 1./tempq(j,k,l,1)
+                  u     = tempq(j,k,l,2)*rho
+                  v     = tempq(j,k,l,3)*rho
+                  w     = tempq(j,k,l,4)*rho
+                  e     = tempq(j,k,l,5)
+                  vsq = u**2 + v**2 + w**2
+                  p   = (gaminf-1.0)*(e-0.5*tempq(j,k,l,1)*vsq)
+                  q(j,k,l) = (p - pinf)*rqinf
+               end do 
+            end do 
+         end do 
+      else if (cq .eq. 16) then
+         do j = 1,nj
+            do k = 1,nk
+               do l = 1,nl
+                  u = tempq(j,k,l,2)
+                  v = tempq(j,k,l,3)
+                  w = tempq(j,k,l,4)
+                  vsq = u**2 + v**2 + w**2
+                  q(j,k,l) = sqrt(vsq)
+               end do 
+            end do 
+         end do 
+      end if   
+  
       if (cp .eq. 1) then
          qt = q(:,:,cpn) 
       else if (cp .eq. 2) then
-         qt = q(:,cpn,:) 
+         qt = q(:,cpn,:)  
       else 
-         qt = q(cpn,:,:)
-      end if  
+	 qt = q(cpn,:,:)
+      end if                   
+ 
       close(1)
       goto 20
  10   continue 

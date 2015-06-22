@@ -4,8 +4,6 @@ from p3dmod import *
 #from plot_funcs import *
 import os
 import wx
-import subprocess
-from subprocess import Popen, PIPE
 
 # The recommended way to use wx with mpl is with the WXAgg
 # backend.
@@ -73,8 +71,8 @@ class GraphFrame(wx.Frame):
         self.boundary_layer()
         self.canvas2           = FigCanvas(self.panel, -1, self.fig1)
         self.fig1.canvas.mpl_connect('scroll_event', self.onscroll)
-        self.legend_adj        = wx.Slider(self.panel, -1, 1000, 0, 1000, size = (-1,250),
-			                style=wx.SL_VERTICAL | wx.SL_AUTOTICKS | wx.SL_LABELS )
+        self.legend_adj        = wx.Slider(self.panel, -1, 1000, 0, 1000, size = (-1,200),
+			                style=wx.SL_VERTICAL | wx.SL_AUTOTICKS )
         self.legend_adj.SetTickFreq(5,1) 
         self.canvas3           = FigCanvas(self.panel, -1, self.fig2)
         self.xmin_control      = BoundControlBox(self.panel, -1, "X min", 0)
@@ -132,7 +130,7 @@ class GraphFrame(wx.Frame):
                                        style=wx.TE_PROCESS_ENTER,
                                        name = "Min", max=9999, min=1)
         self.Bind(wx.EVT_SPINCTRL, self.on_bl_button, self.Bl_jplane)
-        self.Bl_kplane   = wx.SpinCtrl(self.panel, -1, size=(65,-1), value=str(80),
+        self.Bl_kplane   = wx.SpinCtrl(self.panel, -1, size=(65,-1), value=str(15),
                                        style=wx.TE_PROCESS_ENTER,
                                        name = "Min", max=9999, min=1)
         self.Bind(wx.EVT_SPINCTRL, self.on_bl_button, self.Bl_kplane)
@@ -157,10 +155,6 @@ class GraphFrame(wx.Frame):
         self.cb_grid.SetValue(False)
 
 
-        self.flatten = wx.CheckBox(self.panel, -1,
-                                   "Flatten Geometry",
-                                    style=wx.ALIGN_RIGHT)
-        self.Bind(wx.EVT_CHECKBOX, self.on_flatten, self.flatten)
 
         self.fix_axlim = wx.Button(self.panel, -1, "Set to Current")
 	self.fix_axlim.Bind(wx.EVT_BUTTON,self.set_curlim) 
@@ -203,8 +197,6 @@ class GraphFrame(wx.Frame):
         self.hbox1.Add(self.cb_stretch, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.Add(self.times, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.Add(self.k_str, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.flatten, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
         self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.cb_grid, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
 
@@ -301,10 +293,21 @@ class GraphFrame(wx.Frame):
         self.hbox4.AddSpacer(25)
         self.hbox4.Add(self.canvas3, 1, flag=wx.ALIGN_LEFT | wx.TOP | wx.GROW)
 
-
+        self.legadjbox = wx.BoxSizer(wx.VERTICAL)
+        self.legadjbox.AddSpacer(10)
+        self.conscale = wx.StaticText(self.panel, size=(50,10), label= "Adjust \nContour \n Scale:") 
+        self.max_label = wx.StaticText(self.panel, size=(-1,-1), label= "Max") 
+        self.min_label = wx.StaticText(self.panel, size=(-1,-1) , label= "Min") 
+        self.legadjbox.Add( self.conscale, -1, flag=wx.CENTER | wx.TOP )  
+        self.legadjbox.AddSpacer(-150)
+        self.legadjbox.Add( self.min_label, -1, flag=wx.CENTER | wx.TOP )  
+        self.legadjbox.AddSpacer(-175)
+        self.legadjbox.Add(self.legend_adj, -1, flag=wx.CENTER | wx.TOP  )  
+        self.legadjbox.Add(self.max_label, -1, flag=wx.CENTER | wx.TOP  )  
+        
         self.figbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.figbox.Add(self.canvas2, 20, flag=wx.LEFT | wx.TOP | wx.GROW)
-        self.figbox.Add(self.legend_adj, 1, flag=wx.RIGHT | wx.TOP )
+        self.figbox.Add(self.canvas2, 16, flag=wx.LEFT | wx.TOP | wx.GROW)
+        self.figbox.Add(self.legadjbox, 1, flag=wx.RIGHT | wx.TOP )
 
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         self.vbox.Add(self.figbox, 1, flag=wx.LEFT | wx.TOP | wx.GROW)
@@ -424,10 +427,10 @@ class GraphFrame(wx.Frame):
                 self.lmax == self.l_index_control.manual_value2() and
                 self.selvar == self.selectq_control.num           and
                 self.qfile  == self.qfile_control.manual_value()  and
-                self.strk == self.cb_stretch.IsChecked()          and
-                self.flat == self.flatten.IsChecked()             and
+                self.strk   == self.cb_stretch.IsChecked()        and
                 self.kstretch_fac == self.k_str.GetValue()        and
-                self.res  ==self.res_control.GetValue()           and
+                self.res    == self.res_control.GetValue()        and
+                self.lg_ad  ==  self.legend_adj.GetValue()        and
                 self.filetype == self.filesel.GetValue()          and 
                 self.gnum == self.qfile_control.manual_text2.GetValue() and
                 self.grid == self.grid_file_control.manual_value()):
@@ -465,10 +468,10 @@ class GraphFrame(wx.Frame):
         self.ymin   = self.ymin_control.manual_value() 
         self.ymax   = self.ymax_control.manual_value()
         self.strk   = self.cb_stretch.IsChecked()
-        self.flat   = self.flatten.IsChecked()
         self.selvar = self.selectq_control.num
         self.kstretch_fac = self.k_str.GetValue()
         self.res    = self.res_control.GetValue()
+        self.lg_ad  = self.legend_adj.GetValue()
         self.gnum   = self.qfile_control.manual_text2.GetValue()
         self.cpt    = self.cp 
         self.cpnt   = self.cpn 
@@ -515,15 +518,16 @@ class GraphFrame(wx.Frame):
 	    if self.filetype == 'p3d':
                # Special case of velocity vectors 
                if self.selvar == 17:
-                   qnum = 2
-                   self.u,self.v, =readqvel(self.qfile,self.ngrid,self.gnum,
-               	                  self.njind,self.nkind,self.nlind,self.nq,
+                   qnum = self.selvar
+                   self.u,self.v = readqvel(self.qfile,self.ngrid,self.gnum,
+               	                    self.njind,self.nkind,self.nlind,self.nq,
                  	               self.nx,self.ny,self.cp,self.cpn)
                else:
                    qnum = self.selvar        
                self.Q,ioerr = readq(self.qfile,self.ngrid,self.gnum,self.njind,
                               self.nkind,self.nlind,self.nq,qnum, 
-                              self.nx,self.ny,self.cp,self.cpn)
+                              self.nx,self.ny,self.cp,self.cpn, 
+                              self.gaminf,self.refmach)
 	       if ioerr:
 		   self.change = False 
             self.newq = False
@@ -765,6 +769,7 @@ class GraphFrame(wx.Frame):
         viewdict['strk']  = self.cb_stretch.IsChecked()
         viewdict['ksf']   = self.k_str.GetValue()
         viewdict['res']   = self.res_control.GetValue()
+        viewdict['lgad']  = self.legend_adj.GetValue()
         viewdict['filet'] = self.filesel.GetValue()     
         viewdict['showg'] = self.cb_grid.GetValue()
         viewdict['cpt']   = self.cp
@@ -798,12 +803,15 @@ class GraphFrame(wx.Frame):
         self.l_sel.SetValue(viewdict['lcon'])
         self.cb_stretch.SetValue(viewdict['strk'])
         self.k_str.SetValue(viewdict['ksf'])
+        self.legend_adj.SetValue(viewdict['lgad'])
         self.filesel.SetValue(viewdict['filet'])
         self.cb_grid.SetValue(viewdict['showg'])
         self.cp  = viewdict['cpt'] 
         self.cpn = viewdict['cpnt']
         self.selectq_control.cb.SetStringSelection(viewdict['vname'])
         self.on_update_button(event)
+        if self.cb_grid.IsChecked():
+            self.show_grid()
 
 
 # Boundary Layer functions ------------------------------------------------
@@ -820,20 +828,13 @@ class GraphFrame(wx.Frame):
         if not self.update:
             self.axes3.contourf(self.X,self.Y,self.Z)
 
+
     def update_bl_mom(self,X,Y,U,maxk,jcur):
-        Uinf = U[maxk]
-        kct  = 0
-        ucur = 0
-        kmax = self.Bl_kplane.GetValue()
-        while ( kct < kmax):
-            ucur = U[kct]
-            kct  = kct + 1
-        delta = ( (X[kct] - X[0])**2 + (Y[kct] - Y[0])**2)**.5
-        indmax = 0
-        umax   = 0
+        kmax = self.Bl_kplane.GetValue() 
+        indmax,umax = 0,0
         hitmax = True
         for i in range(0,maxk):
-            if (U[i] > umax or i < 5):
+            if (U[i] > 1.003*umax or i < 5):
                 if hitmax:
                     umax = U[i]
                     indmax = i
@@ -842,19 +843,13 @@ class GraphFrame(wx.Frame):
 #        print str(indmax)
         if indmax > maxk:
             indmax = maxk - 1
-        if indmax%2 == 0:
-            x = arange(0,(indmax/2),.5)
-            y = arange(0,(indmax/2),.5)
-            xpt = arange(0,(indmax/2),.5)
-            ypt = arange(0,(indmax/2),.5)
-        else:
-            x = arange(0,(indmax/2)+.5,.5)
-            y = arange(0,(indmax/2)+.5,.5)
-            xpt = arange(0,(indmax/2)+.5,.5)
-            ypt = arange(0,(indmax/2)+.5,.5)
-        dispth = 0
-        momth  = 0
-        for i in range(0,indmax-1):
+        if indmax < kmax:
+            indmax = kmax
+        x   = [0.5 for i in range(indmax)]
+        y   = [0.5 for i in range(indmax)]
+        xpt = [0.5 for i in range(indmax)]
+        dispth,momth = 0,0
+        for i in range(0,indmax):
             uinf = U[indmax]
             y[i] = ( (X[i] - X[0])**2 + (Y[i] - Y[0])**2)**.5
             x[i] = U[i] / uinf
@@ -864,132 +859,66 @@ class GraphFrame(wx.Frame):
                 dispth = dispth + (1 - xpt[i-1])*dy
                 momth  = momth  +  xpt[i-1]*(1 - xpt[i-1])*dy
         H     = dispth/momth
-#        print str(dispth)
-#        print str(momth)
-#        print str(H) ##################################################3
+
 ########################################################################
-        momth = momth*self.rey 
+        momthr = momth*self.rey 
         shape = round(H,4)
         self.shape_label.SetLabel( ''.join(['H (Shape Factor) =   ', str(shape)]) )
-        momthick = round(momth,8)
-        self.mom_label.SetLabel( ''.join(['Momentum \nThickness =   ', str(momthick)]) )
-
+        momthick = round(momthr,8)
+        self.mom_label.SetLabel( ''.join(['Momentum \nThickness Rey # =  ', str(momthick)]) )
+        self.axes3.cla()
         if (self.mom_norm.IsChecked()):
-            self.axes3.cla()
             self.axes3.plot(x,(y/momth))
             self.axes3.set_xlabel("$ u/U_e $")
             self.axes3.set_ylabel("$ z/ \Theta$")
-            self.axes3.set_xbound(lower=-.1, upper=1.2)
+            self.axes3.set_xbound(lower=-.1, upper=1.3)
             self.axes3.set_ybound(lower=0, upper=15)
-            self.canvas3.draw()
-            self.fig2.subplots_adjust(wspace=0.1)
-            self.fig2.subplots_adjust(left=0.2)
-            self.fig2.subplots_adjust(right=0.95)
-            self.fig2.subplots_adjust(bottom=0.15)
-
-
-    def update_bl(self,X,Y,U,maxk,jcur):
-        Uinf = U[maxk]
-        kct  = 0
-        ucur = 0
-        kmax = self.Bl_kplane.GetValue()
-        while ( kct < kmax):
-            ucur = U[kct]
-            kct  = kct + 1
-        delta = ( (X[kct] - X[0])**2 + (Y[kct] - Y[0])**2)**.5
-        x = [.5 for i in range(kct)]
-        y = [.5 for i in range(kct)]
-        xpt = [.5 for i in range(kct)]
-        xpt = [.5 for i in range(kct)]
-        for i in range(0,kct):
-            y[i] = ( (X[i] - X[0])**2 + (Y[i] - Y[0])**2)**.5
-            x[i] = U[i] / Uinf
-        self.axes3.cla()
-        self.axes3.plot(x,y)
-        self.axes3.set_xlabel("$ u/U_e $")
-        self.axes3.set_ylabel("$ z/c $")
-        self.axes3.set_xbound(lower=-.1, upper=1.2)
-        self.canvas3.draw() 
+        else:
+            self.axes3.plot(x,y)
+            self.axes3.set_xlabel("$ u/U_e $")
+            self.axes3.set_ylabel("$ z/c $")
+            self.axes3.set_xbound(lower=-.1, upper=1.3)
+        
         self.fig2.subplots_adjust(wspace=0.1)
-        self.fig2.subplots_adjust(left=0.28)
+        self.fig2.subplots_adjust(left=0.2)
         self.fig2.subplots_adjust(right=0.95)
         self.fig2.subplots_adjust(bottom=0.15)
-        
+        self.canvas3.draw()
         self.line = self.axes2.plot(self.X[self.jcur,:],
-                                     self.Y[self.jcur,:],
+                                    self.Y[self.jcur,:],
                                      color='b')
         self.check_auto_axis(-0.25,1.25,-0.25,0.25)
         self.canvas2.draw()
         # remove the most recent addition to the axes
         del self.axes2.lines[-1]
      
-        
 
 
     def on_bl_button(self,event):
-        self.selectq_control.SetString(string='Streamwise (u) Velocity')
-        self.selectq_control.num = 2
         self.blcall = True
         self.bldraw = True
         self.on_update_button(event)
         self.blcall = False
         self.jcur = self.Bl_jplane.GetValue()
         gnum = self.qfile_control.manual_text2.GetValue()
-        if (self.multgrd):
-            new_str1 = ''.join([self.qfile, '\n','qvalbl.txt', '\n', str(gnum), '\n', str(self.jcur) ,' ',
-                                str(self.jcur) ,' ', str(1), '\n' ,  str(1),' ',
-                                str(self.nkind),' ',str(1), '\n' ,str(1) ,
-                                ' ',str(1) ,' ', str(1), '\n',
-                                str(2), '\n','n'])
-        else:
-            new_str1 = ''.join([self.qfile, '\n','qvalbl.txt', '\n', str(self.jcur) ,' ',
-                                str(self.jcur) ,' ', str(1), '\n' ,  str(1),' ',
-                                str(self.nkind),' ',str(1), '\n' ,str(1) ,
-                                ' ',str(1) ,' ', str(1), '\n',
-                                str(2), '\n','n'])
+        qnum = self.selvar # Really should use velocity magnitude here
+        self.blQ,ioerr = readq(self.qfile,self.ngrid, gnum,self.njind,
+                               self.nkind,self.nlind,self.nq,qnum, 
+                               self.nx,self.ny,self.cp,self.cpn,
+                               self.gaminf,self.refmach)
 
-        new_str2 = ''.join([self.grid, '\n',  str(gnum), '\n', 'cordsbl.txt', '\n', str(self.jcur) ,' ',
-                            str(self.jcur) ,' ', str(1), '\n' ,  str(1),' ',
-                            str(self.nkind),' ', str(1), '\n' ,str(1) ,
-                            ' ',str(1) ,' ', str(1)])
-        p2 = subprocess.Popen(['getgridcords'], stdin=PIPE, stdout=PIPE)
-        o2,e2 = p2.communicate(input=new_str2)
-        p1 = subprocess.Popen(['listplotvar'], stdin=PIPE, stdout=PIPE)
-        o1,e1 = p1.communicate(input=new_str1)
-        p3 = subprocess.Popen(['tail', '-n', '+7'], stdin=PIPE, stdout=PIPE)
-        o3,e3 = p3.communicate(input=o1)
-        p4 = subprocess.Popen(['head', '-n', '-1'], stdin=PIPE, stdout=PIPE)
-        o4,e4 = p4.communicate(input=o3)
-
-        self.file1 = pylab.loadtxt('qvalbl.txt')
-        self.file2 = pylab.loadtxt('cordsbl.txt')
-
-        os.remove('qvalbl.txt')
-        os.remove('cordsbl.txt')
-
-        tot = len(self.file1)
-        u = [.5 for i in range(tot)]
-        x = [.5 for i in range(tot)]
-        y = [.5 for i in range(tot)]
-        for k in range(0,tot):
-            u[k] = float(self.file1[k][3])
-            x[k] = float(self.file2[k][3])
-            y[k] = float(self.file2[k][4])
-        xoverc = round(x[0],5)
-        self.x_over_c.SetLabel( ''.join(['x/c =   ', str(xoverc)]) )
-        if (self.mom_norm.IsChecked()):
+        if not ioerr:
+            u = self.blQ[self.jcur][:]
+            x = self.X[self.jcur][:]
+            y = self.Y[self.jcur][:]              
+            xoverc = round(x[0],5)
+            self.x_over_c.SetLabel( ''.join(['x/c =   ', str(xoverc)]) )
             self.update_bl_mom(x,y,u,(self.nkind-1),(self.jcur))
-        else:
-            self.update_bl_mom(x,y,u,(self.nkind-1),(self.jcur))
-            self.update_bl(x,y,u,(self.nkind-1),(self.jcur))
-
 
 
     def on_cb_stretch(self, event):
         self.on_update_button(event)
 
-    def on_flatten(self, event):
-        self.on_update_button(event)
 
     def on_cb_grid(self, event):
         self.show_grid()
@@ -1015,7 +944,7 @@ class GraphFrame(wx.Frame):
             self.flash_status_message("Saved to %s" % path)
 
     def on_redraw_timer(self, event):
-        i = 1
+        pass
 
     def on_exit(self, event):
         self.Destroy()

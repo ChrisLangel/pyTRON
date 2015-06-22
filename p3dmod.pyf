@@ -44,7 +44,7 @@ python module p3dmod ! in
             real(kind=8) intent(out) :: fsmach
             logical intent(out) :: ioerr
         end subroutine readheader
-        subroutine readq(qfile,ngrid,mgrid,nj,nk,nl,nq,cq,nx,ny,cp,cpn,qt,ioerr) ! in :p3dmod:p3dmod.F
+        subroutine readq(qfile,ngrid,mgrid,nj,nk,nl,nq,cq,nx,ny,cp,cpn,gaminf,mach,qt,ioerr) ! in :p3dmod:p3dmod.F
             character*180 intent(in) :: qfile
             integer intent(in) :: ngrid
             integer intent(in) :: mgrid
@@ -57,6 +57,8 @@ python module p3dmod ! in
             integer intent(in) :: ny
             integer intent(in) :: cp
             integer intent(in) :: cpn
+            real(kind=8) intent(in) :: gaminf
+            real(kind=8) intent(in) :: mach
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: qt
             logical intent(out) :: ioerr
         end subroutine readq
