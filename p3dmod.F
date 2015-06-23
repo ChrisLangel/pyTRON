@@ -202,13 +202,12 @@
  20   continue
       end 
 !
-!      
       subroutine readdiffhead(qfile,nj,nk,nq,ioerr) 
 
       character(180),intent(in) :: qfile
       integer, intent(out) :: nj,nk,nq
       logical, intent(out) :: ioerr
-
+      
       ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
       read(1,err=10,end=10) nj,nk,nq
@@ -231,8 +230,7 @@
 
       ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
-      read(1,err=10,end=10) ! skip header
-
+      read(1,err=10,end=10) ! skip header 
 !     Actually read the q array for the desired grid 
       read(1,err=10,end=10) qt
       qout = qt(:,:,cq) 

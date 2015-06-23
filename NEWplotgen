@@ -491,6 +491,7 @@ class GraphFrame(wx.Frame):
 	   elif self.filetype == 'diff':
 	      self.njind,self.nkind,self.nq,ioerr = readdiffhead(self.qfile)
 	      self.Q,ioerr = readdiffq(self.qfile,self.njind,self.nkind,self.nq,self.selvar)
+	     
 	      self.nlind = 3 #Assuming we have a 2-D grid here 
 	      self.refmach  = 99999
 	      self.alpha = 9999
