@@ -196,7 +196,32 @@ class QvarBox(wx.Panel):
     def OnSelect(self, e):
         i = e.GetString()
         self.num = int(self.qvarnum[self.cb.GetCurrentSelection()])         
+   
+    def DiffSelect(self,e): 
+        diffvars = ['']
+   
+    def LMselect(self,e):
+	LMvars = [ 'Re_v', 'Re_c', 'Fonset1 (Re_v/2.193*Re_c)', 'F_onset2', 'F_onset3',
+	           'F_onset', 'DNU (1/nu)', 'SIJSQ', 'DNU'] 
+	self.qvarnum = ['1','2','3','4','5','6','7','8','9'] 
+	self.cb.Clear()
+	for var in LMvars:
+		self.cb.Append(var)
+	self.SetString(string='Re_v') 
+	self.num = 1
     
+    def ptdselect(self,e):
+        qvars = [ 'Density' , 'Streamwise (u) Velocity' , 'Spanwise (v) Velocity' , 'Normal (w) Velocity',
+                  'q5', 'q6','k (SST) ' , 'w (SST) ' , 'Intermitency (SST_LM)' , 'RE_thetat (SST_LM)',
+                  'A_r (SST_LM_RA)', 'Pressure', 'Velocity Magnitude', 'Velocity Vectors' ]
+
+        self.qvarnum = [ '1', '2', '3', '4', '5', '6', '7', '8' ,'9', '10','11', '15', '16', '17' ] 
+        self.cb.Clear()
+        for var in qvars:
+		self.cb.Append(var)
+	self.SetString(string='Streamwise (u) Velocity') 
+	self.num = 2 
+
     def GetValue(self):
         return self.cb.GetValue()
 

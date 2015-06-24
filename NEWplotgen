@@ -107,8 +107,9 @@ class GraphFrame(wx.Frame):
 
 
         self.update_button = wx.Button(self.panel, -1, "Update")
-	self.filesel     =  wx.ComboBox( self.panel, choices=['p3d','diff'],
+	self.filesel     =  wx.ComboBox( self.panel, choices=['p3d','diff','LM_quant'],
                                          size = (100,-1),style =wx.CB_READONLY )
+	self.filesel.Bind(wx.EVT_COMBOBOX, self.chg_filetype) 
         self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
  #       self.Bind(wx.EVT_UPDATE_UI, self.on_update_update_button, self.update_button)
  
@@ -488,7 +489,7 @@ class GraphFrame(wx.Frame):
               self.beta,self.fsmach,ioerr = readheader(self.qfile,self.gnum)	
 	      if ioerr:
 		      self.newq = False
-	   elif self.filetype == 'diff':
+	   elif self.filetype == 'diff' or self.filetype == 'LM_quant':
 	      self.njind,self.nkind,self.nq,ioerr = readdiffhead(self.qfile)
 	      self.Q,ioerr = readdiffq(self.qfile,self.njind,self.nkind,self.nq,self.selvar)
 	     
@@ -814,6 +815,13 @@ class GraphFrame(wx.Frame):
         if self.cb_grid.IsChecked():
             self.show_grid()
 
+    
+    def chg_filetype(self,event):
+	if (self.filesel.GetValue() == 'diff' or 
+	    self.filesel.GetValue() == 'LM_quant' ):
+		self.selectq_control.LMselect(event)
+        else: 
+		self.selectq_control.ptdselect(event)
 
 # Boundary Layer functions ------------------------------------------------
     def boundary_layer(self):

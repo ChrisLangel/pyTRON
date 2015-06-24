@@ -297,7 +297,7 @@
       read(1) ! Skip header 
       read(1) tempq 
       qu = tempq(:,:,:,2)
-      qv = tempq(:,:,:,3) 
+      qv = tempq(:,:,:,4) 
 ! 
       if (cp .eq. 1) then
          u = qu(:,:,cpn) 
