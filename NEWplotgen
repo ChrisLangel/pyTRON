@@ -512,6 +512,12 @@ class GraphFrame(wx.Frame):
                self.gmaxx = np.amax(self.X)
                self.gminy = np.amin(self.Y)
                self.gmaxy = np.amax(self.Y)                                      
+               self.j_index_control.manual_text2.SetValue(self.njind)
+               self.k_index_control.manual_text2.SetValue(self.nkind)
+               self.l_index_control.manual_text2.SetValue(self.nlind)            
+               self.j_index_control.manual_text1.SetValue(1)
+               self.k_index_control.manual_text1.SetValue(1)
+               self.l_index_control.manual_text1.SetValue(1)            
                self.newgrid = False
 	    else:
                self.change = False
@@ -539,11 +545,6 @@ class GraphFrame(wx.Frame):
         if (self.changebounds and not self.change):
             self.check_auto_axis(-0.25,1.25,-0.25,0.25)
             self.canvas2.draw()
-        # If this is the first time through load the max indicies
-        if (self.update == False):
-            self.j_index_control.manual_text2.SetValue(self.njind)
-            self.k_index_control.manual_text2.SetValue(self.nkind)
-            self.l_index_control.manual_text2.SetValue(self.nlind)            
         self.update = True 
 
 
