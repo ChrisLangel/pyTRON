@@ -502,7 +502,7 @@ class GraphFrame(wx.Frame):
 		      self.newq = False
 	   self.check_max() 
            self.get_c_plane(self)                   
-        # If we need to reload the grid coordinates
+	# If we need to reload the grid coordinates
         if (self.newgrid):
             self.X, self.Y,ioerr = getgridcords( self.grid,self.gnum,self.njind,
                                                  self.nkind,self.nlind,self.cp,
@@ -531,7 +531,8 @@ class GraphFrame(wx.Frame):
                	                    self.njind,self.nkind,self.nlind,self.nq,
                  	               self.nx,self.ny,self.cp,self.cpn)
                else:
-                   qnum = self.selvar        
+                   qnum = self.selvar  
+	       # Get a Q-contour even if we are drawing velocity vectors
                self.Q,ioerr = readq(self.qfile,self.ngrid,self.gnum,self.njind,
                               self.nkind,self.nlind,self.nq,qnum, 
                               self.nx,self.ny,self.cp,self.cpn, 
@@ -541,6 +542,7 @@ class GraphFrame(wx.Frame):
             self.newq = False
         if (self.update == False or self.change == True):
             self.draw_update()
+        
         # If we are only changing the window             
         if (self.changebounds and not self.change):
             self.check_auto_axis(-0.25,1.25,-0.25,0.25)
@@ -570,6 +572,7 @@ class GraphFrame(wx.Frame):
 	kmax = self.k_index_control.manual_text2.GetValue()
 	jmin = self.j_index_control.manual_text1.GetValue()
 	kmin = self.k_index_control.manual_text1.GetValue()
+	
         self.Qplt = self.Q	
         self.Xplt = self.X 
         self.Yplt = self.Y 
@@ -580,11 +583,11 @@ class GraphFrame(wx.Frame):
             self.Xplt,self.Yplt = stretch_norm(self.X,self.Y,stretch,lj,lk)
             self.Xplt = np.array(self.Xplt)
             self.Yplt = np.array(self.Yplt)
-        if ((jmax < self.njind or jmin > 2) and self.update):
+        if ((jmax < self.njind or jmin > 1) and self.update):
 		self.Xplt = self.X[jmin:jmax][:]
 		self.Yplt = self.Y[jmin:jmax][:]
 		self.Qplt = self.Q[jmin:jmax][:]
-        if ((kmax < self.nkind or kmin > 2) and self.update):
+        if ((kmax < self.nkind or kmin > 1) and self.update):
 	        self.Xtemp,self.Qtemp,self.Ytemp = [],[],[]
 		for i in range(len(self.Xplt)):
 	        	self.Xtemp.append(self.Xplt[i][kmin:kmax])

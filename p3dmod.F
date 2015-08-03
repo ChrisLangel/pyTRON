@@ -128,21 +128,30 @@
       real(kind=8), intent(in) :: gaminf,mach
       real(kind=8),dimension(nx,ny),intent(out) :: qt
       logical, intent(out) :: ioerr
-      integer :: n,j,k,l     
+      integer :: n,j,k,l,njt,nkt,nlt     
       real(kind=8) :: u,v,w,vsq,e,pinf,qinf,rqinf,p,rho
       real(kind=8),dimension(nj,nk,nl) :: q  
       real(kind=8),dimension(nj,nk,nl,nq) :: tempq 
+      
+
 
       ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
 
+
+      read(1,err=30) njt,nkt,nlt
+      rewind(1) 
+      goto 50
+ 30   rewind(1)  
+      read(1,err=10,end=10)  
+ 50   continue
 !     Skip all the header info       
-      if (ngrid .eq. 1) then
-         read(1,err=10,end=10)
-      else 
-         read(1,err=10,end=10) 
-         read(1,err=10,end=10)
-      end if
+      
+      read(1,err=10,end=10)
+      !else 
+      !   read(1,err=10,end=10) 
+      !   read(1,err=10,end=10)
+      !end if
       
       do n = 1,mgrid-1
          read(1,err=10,end=10)
