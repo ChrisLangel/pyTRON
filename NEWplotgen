@@ -527,8 +527,8 @@ class GraphFrame(wx.Frame):
 	    if self.filetype == 'p3d':
                # Special case of velocity vectors 
                if self.selvar == 17:
-                   qnum = self.selvar
-                   self.u,self.v = readqvel(self.qfile,self.ngrid,self.gnum,
+                   qnum = 16
+                   self.u,self.v,ioerr=readqvel(self.qfile,self.ngrid,self.gnum,
                	                    self.njind,self.nkind,self.nlind,self.nq,
                  	               self.nx,self.ny,self.cp,self.cpn)
                else:
@@ -539,6 +539,7 @@ class GraphFrame(wx.Frame):
                               self.nx,self.ny,self.cp,self.cpn, 
                               self.gaminf,self.refmach)
 	       if ioerr:
+		   print "IOERR !!!!!!!!!!!!!!!"
 		   self.change = False 
             self.newq = False
         if (self.update == False or self.change == True):

@@ -277,34 +277,39 @@
 
 
       subroutine readqvel(qfile,ngrid,mgrid,nj,nk,nl,nq,
-     &                 nx,ny,cp,cpn,u,v)
+     &                 nx,ny,cp,cpn,u,v,ioerr)
       
       character(180),intent(in) :: qfile
       integer,intent(in) :: mgrid,ngrid,nj,nk,nl,nq,
      &                      nx,ny,cp,cpn
       real(kind=8),dimension(nx,ny),intent(out) :: u,v
+      logical, intent(out) :: ioerr 
       real(kind=8),dimension(nj,nk,nl) :: qu,qv
-      integer :: n      
+      integer :: n,njt,nkt,nlt      
       real(kind=8),dimension(nj,nk,nl,nq) :: tempq 
 
+      ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
 
-!     Skip all the header info       
-      if (ngrid .eq. 1) then
-         read(1)
-      else 
-         read(1) 
-         read(1)
-      end if
+
+      read(1,err=30) njt,nkt,nlt
+      rewind(1)
+      goto 50
+30    rewind(1) 
+      read(1,err=10,end=10) 
+50    continue
+
+!     Skip all the header info  
+      read(1,err=10,end=10)      
       
       do n = 1,mgrid-1
-         read(1)
-         read(1) 
+         read(1,err=10,end=10)
+         read(1,err=10,end=10) 
       end do 
 
 !     Actually read the q array for the desired grid 
-      read(1) ! Skip header 
-      read(1) tempq 
+      read(1,err=10,end=10) ! Skip header 
+      read(1,err=10,end=10) tempq 
       qu = tempq(:,:,:,2)
       qv = tempq(:,:,:,4) 
 ! 
@@ -320,6 +325,11 @@
       end if 
 
       close(1)
+      goto 20
+10    continue
+      close(1)
+      ioerr = .true.
+20    continue  
       end 
     
 

@@ -87,7 +87,7 @@ python module p3dmod ! in
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: xstr
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: ystr
         end subroutine stretch_norm
-        subroutine readqvel(qfile,ngrid,mgrid,nj,nk,nl,nq,nx,ny,cp,cpn,u,v) ! in :p3dmod:p3dmod.F
+        subroutine readqvel(qfile,ngrid,mgrid,nj,nk,nl,nq,nx,ny,cp,cpn,u,v,ioerr) ! in :p3dmod:p3dmod.F
             character*180 intent(in) :: qfile
             integer intent(in) :: ngrid
             integer intent(in) :: mgrid
@@ -101,6 +101,7 @@ python module p3dmod ! in
             integer intent(in) :: cpn
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: u
             real(kind=8) dimension(nx,ny),intent(out),depend(nx,ny) :: v
+            logical intent(out) :: ioerr
         end subroutine readqvel
     end interface 
 end python module p3dmod
