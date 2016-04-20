@@ -46,6 +46,8 @@ class GraphFrame(wx.Frame):
         self.create_menu()
         self.create_status_bar()
         self.create_main_panel()
+	self.save_min = 0.0
+	self.save_max = 1.0
         
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
@@ -156,6 +158,11 @@ class GraphFrame(wx.Frame):
         self.Bind(wx.EVT_CHECKBOX, self.on_cb_grid, self.cb_grid)
         self.cb_grid.SetValue(False)
 
+        self.const_con = wx.CheckBox(self.panel, -1,
+                                   " Fix\nScale",
+                                   style=wx.ALIGN_RIGHT)
+        self.Bind(wx.EVT_CHECKBOX, self.on_const_con, self.const_con)
+        self.const_con.SetValue(False)
 
 
         self.fix_axlim = wx.Button(self.panel, -1, "Set to Current")
@@ -296,7 +303,8 @@ class GraphFrame(wx.Frame):
         self.hbox4.Add(self.canvas3, 1, flag=wx.ALIGN_LEFT | wx.TOP | wx.GROW)
 
         self.legadjbox = wx.BoxSizer(wx.VERTICAL)
-        self.legadjbox.AddSpacer(10)
+        self.legadjbox.Add( self.const_con, -1, flag=wx.CENTER | wx.TOP )  
+        self.legadjbox.AddSpacer(-50)
         self.conscale = wx.StaticText(self.panel, size=(50,10), label= "Adjust \nContour \n Scale:") 
         self.max_label = wx.StaticText(self.panel, size=(-1,-1), label= "Max") 
         self.min_label = wx.StaticText(self.panel, size=(-1,-1) , label= "Min") 
@@ -306,6 +314,9 @@ class GraphFrame(wx.Frame):
         self.legadjbox.AddSpacer(-175)
         self.legadjbox.Add(self.legend_adj, -1, flag=wx.CENTER | wx.TOP  )  
         self.legadjbox.Add(self.max_label, -1, flag=wx.CENTER | wx.TOP  )  
+        self.legadjbox.AddSpacer(-30)
+        
+        
         
         self.figbox = wx.BoxSizer(wx.HORIZONTAL)
         self.figbox.Add(self.canvas2, 16, flag=wx.LEFT | wx.TOP | wx.GROW)
@@ -528,7 +539,7 @@ class GraphFrame(wx.Frame):
                # Special case of velocity vectors 
                if self.selvar == 17:
                    qnum = self.selvar
-                   self.u,self.v = readqvel(self.qfile,self.ngrid,self.gnum,
+                   self.u,self.v,ioerr = readqvel(self.qfile,self.ngrid,self.gnum,
                	                    self.njind,self.nkind,self.nlind,self.nq,
                  	               self.nx,self.ny,self.cp,self.cpn)
                else:
@@ -539,6 +550,7 @@ class GraphFrame(wx.Frame):
                               self.nx,self.ny,self.cp,self.cpn, 
                               self.gaminf,self.refmach)
 	       if ioerr:
+		   print "IO error!" 
 		   self.change = False 
             self.newq = False
         if (self.update == False or self.change == True):
@@ -599,6 +611,12 @@ class GraphFrame(wx.Frame):
 	        self.Qplt = self.Qtemp 
 	# Get the range of the q-var for the contour plot
 	scale     = float(self.legend_adj.GetValue())/1000.0
+        if (self.const_con.GetValue()):
+		self.minz = self.save_min
+		self.maxz = self.save_max
+	else:
+		self.minz = np.amin(self.Qplt)
+        	self.maxz = np.amax(self.Qplt)*scale
 	self.minz = np.amin(self.Qplt)
         self.maxz = np.amax(self.Qplt)*scale
 	res = self.res_control.num 
@@ -930,6 +948,9 @@ class GraphFrame(wx.Frame):
             self.x_over_c.SetLabel( ''.join(['x/c =   ', str(xoverc)]) )
             self.update_bl_mom(x,y,u,(self.nkind-1),(self.jcur))
 
+    def on_const_con(self,event):
+        self.save_min = self.minz
+        self.save_max = self.maxz
 
     def on_cb_stretch(self, event):
         self.on_update_button(event)
