@@ -36,7 +36,6 @@ class GraphFrame(wx.Frame):
         self.newq         = True
         self.changebounds = False
         self.filetype     = 'diff'
-        self.numcalls     = 1
         self.line = ""
         self.cb  = ""
         self.cp  = 1
@@ -400,7 +399,7 @@ class GraphFrame(wx.Frame):
         self.axes2.set_axis_bgcolor('white')
         if not self.update:
             initplot = self.cplot = self.axes2.contourf(self.X,self.Y,self.Z)
-            self.fig1.colorbar(initplot)
+            self.cbar = self.fig1.colorbar(initplot,use_gridspec=True)
 
 
 
@@ -445,6 +444,7 @@ class GraphFrame(wx.Frame):
                 self.res    == self.res_control.GetValue()        and
                 self.lg_ad  ==  self.legend_adj.GetValue()        and
                 self.filetype == self.filesel.GetValue()          and 
+                self.fix_con == self.const_con.GetValue()         and 
                 self.gnum == self.qfile_control.manual_text2.GetValue() and
                 self.grid == self.grid_file_control.manual_value()):
                     self.change = False
@@ -490,6 +490,7 @@ class GraphFrame(wx.Frame):
         self.cpnt   = self.cpn 
         self.cord   = self.grid_file_control.second_value() 
         self.filetype = self.filesel.GetValue() 
+        self.fix_con = self.const_con.GetValue() 
         if (self.bldraw == False and self.blcall == True):
             self.update = False
         # If anything has changed re-read the header file 
@@ -554,7 +555,6 @@ class GraphFrame(wx.Frame):
 		   self.change = False 
             self.newq = False
         if (self.update == False or self.change == True):
-            self.numcalls += 1.0
             self.draw_update()
         # If we are only changing the window             
         if (self.changebounds and not self.change):
@@ -617,22 +617,18 @@ class GraphFrame(wx.Frame):
 	else:
 		self.minz = np.amin(self.Qplt)
         	self.maxz = np.amax(self.Qplt)*scale
-	self.minz = np.amin(self.Qplt)
-        self.maxz = np.amax(self.Qplt)*scale
 	res = self.res_control.num 
         sp = (self.maxz - self.minz)/res
         if (self.minz >= 0):
             levels = arange((self.minz-self.minz*.1),self.maxz*1.05, sp )
         else:
             levels = arange((self.minz+self.minz*.1),self.maxz*1.05, sp ) 
-	
-        self.axes2.cla() 
+	  
+        self.fig1.clf()
+        self.axes2 = self.fig1.add_subplot(111)
         cplot = self.axes2.contourf(self.Xplt,self.Yplt,self.Qplt,levels)
-	# Remove the old color bar, it is treated as a separate axis
-	self.fig1.delaxes(self.fig1.axes[1])
-        self.axscale = (self.numcalls)*0.5
-	self.fig1.subplots_adjust(right=self.axscale)
-	self.fig1.colorbar(cplot) 
+        self.cbar = self.fig1.colorbar(cplot,use_gridspec=True) 
+        
         
         if (self.selvar == 17):
             self.axes2.quiver(self.Xplt[::6,::3],self.Yplt[::6,::3],         
