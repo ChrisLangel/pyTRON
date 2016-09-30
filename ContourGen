@@ -26,12 +26,12 @@ class GraphFrame(wx.Frame):
 
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title)
-        # Set some boolean variables 
+        # Set some boolean variables
         self.update       = False
         self.bldraw       = False
         self.blcall       = False
         self.multgrd      = False
-        self.redrawgrid   = True 
+        self.redrawgrid   = True
         self.newgrid      = True
         self.newq         = True
         self.changebounds = False
@@ -40,17 +40,17 @@ class GraphFrame(wx.Frame):
         self.cb  = ""
         self.cp  = 1
         self.cpn = 1
-        self.viewhist = {}   
-        self.numsaved = 0  
+        self.viewhist = {}
+        self.numsaved = 0
         self.create_menu()
         self.create_status_bar()
         self.create_main_panel()
 	self.save_min = 0.0
 	self.save_max = 1.0
-        
+
         self.redraw_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_redraw_timer, self.redraw_timer)
-	
+
 
         self.redraw_timer.Start(100)
 
@@ -75,7 +75,7 @@ class GraphFrame(wx.Frame):
         self.fig1.canvas.mpl_connect('scroll_event', self.onscroll)
         self.legend_adj        = wx.Slider(self.panel, -1, 1000, 0, 1000, size = (-1,200),
 			                style=wx.SL_VERTICAL | wx.SL_AUTOTICKS )
-        self.legend_adj.SetTickFreq(5,1) 
+        self.legend_adj.SetTickFreq(5,1)
         self.canvas3           = FigCanvas(self.panel, -1, self.fig2)
         self.xmin_control      = BoundControlBox(self.panel, -1, "X min", 0)
         self.xmax_control      = BoundControlBox(self.panel, -1, "X max", 1)
@@ -111,10 +111,10 @@ class GraphFrame(wx.Frame):
         self.update_button = wx.Button(self.panel, -1, "Update")
 	self.filesel     =  wx.ComboBox( self.panel, choices=['p3d','diff','LM_quant'],
                                          size = (100,-1),style =wx.CB_READONLY )
-	self.filesel.Bind(wx.EVT_COMBOBOX, self.chg_filetype) 
+	self.filesel.Bind(wx.EVT_COMBOBOX, self.chg_filetype)
         self.Bind(wx.EVT_BUTTON, self.on_update_button, self.update_button)
  #       self.Bind(wx.EVT_UPDATE_UI, self.on_update_update_button, self.update_button)
- 
+
         self.saved_views  = wx.ComboBox(self.panel, choices=[''],
 			                size=(150,-1), style=wx.CB_READONLY)
         self.sview_button = wx.Button(self.panel, -1, "Save View")
@@ -150,7 +150,7 @@ class GraphFrame(wx.Frame):
         self.k_str = wx.SpinCtrl(self.panel, -1, size=(65,-1), value=str(10),
                                      style=wx.TE_PROCESS_ENTER,
                                      name = "Min", max=9999, min=1)
-        
+
         self.cb_grid = wx.CheckBox(self.panel, -1,
                                    "Show Grid",
                                    style=wx.ALIGN_RIGHT)
@@ -165,11 +165,11 @@ class GraphFrame(wx.Frame):
 
 
         self.fix_axlim = wx.Button(self.panel, -1, "Set to Current")
-	self.fix_axlim.Bind(wx.EVT_BUTTON,self.set_curlim) 
+	self.fix_axlim.Bind(wx.EVT_BUTTON,self.set_curlim)
 
         self.allauto = wx.Button(self.panel, -1, "All Auto")
-	self.allauto.Bind(wx.EVT_BUTTON,self.set_allauto) 
-        
+	self.allauto.Bind(wx.EVT_BUTTON,self.set_allauto)
+
 	self.l_sel = wx.RadioButton(self.panel, -1,
             label="Const-L ", style=wx.RB_GROUP)
         self.j_sel = wx.RadioButton(self.panel, -1,
@@ -182,7 +182,7 @@ class GraphFrame(wx.Frame):
         if not self.update:
             self.l_index_control.blank_out(1)
 
-#        self.Bind(wx.EVT_CHAR_HOOK,self.onKeyPress)   
+#        self.Bind(wx.EVT_CHAR_HOOK,self.onKeyPress)
 #        self.xmin_control.radio_auto.Bind(wx.EVT_RADIOBUTTON,self.on_update_button(self))
 
         self.selbox = wx.BoxSizer(wx.VERTICAL)
@@ -216,14 +216,14 @@ class GraphFrame(wx.Frame):
         self.hbox6 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox6.Add(self.ymin_control, border=5, flag=wx.ALL)
         self.hbox6.Add(self.ymax_control, border=5, flag=wx.ALL)
- 
+
 
         self.axmod = wx.BoxSizer(wx.HORIZONTAL)
         self.axmod.Add(self.fix_axlim, border=5, flag=wx.ALIGN_LEFT | wx.TOP )
         self.axmod.AddSpacer(10)
         self.axmod.Add(self.allauto, border=5, flag=wx.ALIGN_LEFT | wx.TOP )
-          
-	  
+
+
         self.hbox7 = wx.BoxSizer(wx.VERTICAL)
         self.hbox7.Add(self.hbox5, 0, flag=wx.ALIGN_LEFT | wx.TOP)
         self.hbox7.Add(self.hbox6, 0, flag=wx.ALIGN_LEFT | wx.TOP)
@@ -236,33 +236,33 @@ class GraphFrame(wx.Frame):
         self.hbox2.Add(self.qfile_control, border=5, flag=wx.ALL)
         self.hbox2.Add(self.qcont_label, border=5, flag=wx.ALL)
         self.b1 = wx.BoxSizer( wx.HORIZONTAL )
-        self.b1.Add(self.selectq_control, flag=wx.ALL)  
+        self.b1.Add(self.selectq_control, flag=wx.ALL)
         self.b1.AddSpacer(15)
-        self.b1.Add(self.sview_button, flag=wx.ALL) 
+        self.b1.Add(self.sview_button, flag=wx.ALL)
         #self.hbox2.Add(self.selectq_control, border=5, flag=wx.ALL)
-        self.hbox2.Add( self.b1, border=5, flag=wx.ALL ) 
-        
+        self.hbox2.Add( self.b1, border=5, flag=wx.ALL )
+
         self.vb1 = wx.BoxSizer( wx.VERTICAL )
         self.vb1.Add( self.res_label, border=5, flag=wx.ALL )
-        self.vb1.Add( self.res_control, border=5, flag=wx.ALL ) 
-        
+        self.vb1.Add( self.res_control, border=5, flag=wx.ALL )
+
         self.vb2 = wx.BoxSizer( wx.VERTICAL )
         self.vb2.Add( self.saved_views, border=5, flag=wx.ALL )
         self.vb2.Add( self.lview_button, border=5, flag=wx.ALIGN_CENTER )
-        
-        
+
+
         self.b2 = wx.BoxSizer( wx.HORIZONTAL )
         self.b2.Add(self.vb1, flag = wx.ALL)
         self.b2.AddSpacer(20)
         self.b2.Add(self.vb2, flag = wx.ALL)
-        
+
         self.hbox2.Add(self.b2, flag=wx.ALL)
-        
-        
+
+
 
         self.update_filetype = wx.BoxSizer( wx.HORIZONTAL )
-	self.update_filetype.Add( self.update_button, border=5, flag=wx.ALL ) 
-	self.update_filetype.Add( self.filesel, border=5, flag=wx.ALL ) 
+	self.update_filetype.Add( self.update_button, border=5, flag=wx.ALL )
+	self.update_filetype.Add( self.filesel, border=5, flag=wx.ALL )
         self.hbox3 = wx.BoxSizer(wx.VERTICAL)
         self.hbox3 = wx.BoxSizer(wx.VERTICAL)
         self.hbox3.Add(self.j_index_control, border=5, flag=wx.ALL )
@@ -302,21 +302,21 @@ class GraphFrame(wx.Frame):
         self.hbox4.Add(self.canvas3, 1, flag=wx.ALIGN_LEFT | wx.TOP | wx.GROW)
 
         self.legadjbox = wx.BoxSizer(wx.VERTICAL)
-        self.legadjbox.Add( self.const_con, -1, flag=wx.CENTER | wx.TOP )  
+        self.legadjbox.Add( self.const_con, -1, flag=wx.CENTER | wx.TOP )
         self.legadjbox.AddSpacer(-50)
-        self.conscale = wx.StaticText(self.panel, size=(50,10), label= "Adjust \nContour \n Scale:") 
-        self.max_label = wx.StaticText(self.panel, size=(-1,-1), label= "Max") 
-        self.min_label = wx.StaticText(self.panel, size=(-1,-1) , label= "Min") 
-        self.legadjbox.Add( self.conscale, -1, flag=wx.CENTER | wx.TOP )  
+        self.conscale = wx.StaticText(self.panel, size=(50,10), label= "Adjust \nContour \n Scale:")
+        self.max_label = wx.StaticText(self.panel, size=(-1,-1), label= "Max")
+        self.min_label = wx.StaticText(self.panel, size=(-1,-1) , label= "Min")
+        self.legadjbox.Add( self.conscale, -1, flag=wx.CENTER | wx.TOP )
         self.legadjbox.AddSpacer(-150)
-        self.legadjbox.Add( self.min_label, -1, flag=wx.CENTER | wx.TOP )  
+        self.legadjbox.Add( self.min_label, -1, flag=wx.CENTER | wx.TOP )
         self.legadjbox.AddSpacer(-175)
-        self.legadjbox.Add(self.legend_adj, -1, flag=wx.CENTER | wx.TOP  )  
-        self.legadjbox.Add(self.max_label, -1, flag=wx.CENTER | wx.TOP  )  
+        self.legadjbox.Add(self.legend_adj, -1, flag=wx.CENTER | wx.TOP  )
+        self.legadjbox.Add(self.max_label, -1, flag=wx.CENTER | wx.TOP  )
         self.legadjbox.AddSpacer(-30)
-        
-        
-        
+
+
+
         self.figbox = wx.BoxSizer(wx.HORIZONTAL)
         self.figbox.Add(self.canvas2, 16, flag=wx.LEFT | wx.TOP | wx.GROW)
         self.figbox.Add(self.legadjbox, 1, flag=wx.RIGHT | wx.TOP )
@@ -336,7 +336,7 @@ class GraphFrame(wx.Frame):
 
         if self.res_control.GetValue() == '':
             self.res_control.SetString(string='Low')
-	
+
 	if self.filesel.GetValue() == '':
             self.filesel.SetValue('p3d')
 
@@ -409,23 +409,23 @@ class GraphFrame(wx.Frame):
         self.grid_file_control.value2 = self.grid_file_control.manual_text2.GetValue()
         self.qfile_control.value2   = self.grid_file_control.manual_text2.GetValue()
         self.change = True
-        
+
 
         # See if anything has changed since last time update button was pushed
         if (self.update):
-	    newginp = self.qfile_control.manual_text2.GetValue().split(",") 
+	    newginp = self.qfile_control.manual_text2.GetValue().split(",")
             self.get_c_plane(self)
-            # Determine if the bounds of the axis have changed 
+            # Determine if the bounds of the axis have changed
             if (self.axmin  != self.xmin_control.is_auto() or
-                self.axmax  != self.xmax_control.is_auto() or 
-                self.aymin  != self.ymin_control.is_auto() or 
-                self.aymax  != self.ymax_control.is_auto() or 
+                self.axmax  != self.xmax_control.is_auto() or
+                self.aymin  != self.ymin_control.is_auto() or
+                self.aymax  != self.ymax_control.is_auto() or
                 self.xmin   != self.xmin_control.manual_value() or
                 self.xmax   != self.xmax_control.manual_value() or
                 self.ymin   != self.ymin_control.manual_value() or
                 self.ymax   != self.ymax_control.manual_value()):
                     self.changebounds = True
-                    
+
             if (self.jmin == self.j_index_control.manual_value1() and
                 self.jmax == self.j_index_control.manual_value2() and
                 self.kmin == self.k_index_control.manual_value1() and
@@ -438,16 +438,16 @@ class GraphFrame(wx.Frame):
                 self.kstretch_fac == self.k_str.GetValue()        and
                 self.res    == self.res_control.GetValue()        and
                 self.lg_ad  ==  self.legend_adj.GetValue()        and
-                self.filetype == self.filesel.GetValue()          and 
-                self.fix_con == self.const_con.GetValue()         and 
+                self.filetype == self.filesel.GetValue()          and
+                self.fix_con == self.const_con.GetValue()         and
                 self.gnum == newginp and
                 self.grid == self.grid_file_control.manual_value()):
                     self.change = False
             # See if the plane we are looking at has changed
             if (self.cpt != self.cp or self.cpnt != self.cpn):
                 self.newgrid = True
-                self.newq    = True 
-                self.change  = True 
+                self.newq    = True
+                self.change  = True
             # Now see if we specifically need to reload grid cords or q-var
             if (self.gnum != newginp or
                 self.grid != self.grid_file_control.manual_value() ):
@@ -459,7 +459,7 @@ class GraphFrame(wx.Frame):
                     self.newq = True
 
 
-        
+
         self.grid   = self.grid_file_control.manual_value()
         self.qfile  = self.qfile_control.manual_value()
         self.jmin   = self.j_index_control.manual_value1()
@@ -472,52 +472,54 @@ class GraphFrame(wx.Frame):
         self.axmax  = self.xmax_control.is_auto()
         self.aymin  = self.ymin_control.is_auto()
         self.aymax  = self.ymax_control.is_auto()
-        self.xmin   = self.xmin_control.manual_value() 
-        self.xmax   = self.xmax_control.manual_value() 
-        self.ymin   = self.ymin_control.manual_value() 
+        self.xmin   = self.xmin_control.manual_value()
+        self.xmax   = self.xmax_control.manual_value()
+        self.ymin   = self.ymin_control.manual_value()
         self.ymax   = self.ymax_control.manual_value()
         self.strk   = self.cb_stretch.IsChecked()
         self.selvar = self.selectq_control.num
         self.kstretch_fac = self.k_str.GetValue()
         self.res    = self.res_control.GetValue()
         self.lg_ad  = self.legend_adj.GetValue()
-        self.gnum   = self.qfile_control.manual_text2.GetValue().split(",") 
-	#if (type(self.gnum) == int): self.gnum = [self.gnum] 
-	#if (type(self.gnum) == str): self.gnum = self.gnum.split(",") 
-        self.cpt    = self.cp 
-        self.cpnt   = self.cpn 
-        self.cord   = self.grid_file_control.second_value() 
-        self.filetype = self.filesel.GetValue() 
-        self.fix_con = self.const_con.GetValue() 
+        self.gnum   = self.qfile_control.manual_text2.GetValue().split(",")
+	#if (type(self.gnum) == int): self.gnum = [self.gnum]
+	#if (type(self.gnum) == str): self.gnum = self.gnum.split(",")
+        self.cpt    = self.cp
+        self.cpnt   = self.cpn
+        self.cord   = self.grid_file_control.second_value()
+        self.filetype = self.filesel.GetValue()
+        self.fix_con = self.const_con.GetValue()
         if (self.bldraw == False and self.blcall == True):
             self.update = False
-        # If anything has changed re-read the header file 
-	# Also see what format file we are looking at 
+        # If anything has changed re-read the header file
+	# Also see what format file we are looking at
         if (self.update == False or self.change == True):
 	   if self.filetype == 'p3d':
 		self.njind, self.nkind, self.nlind = [],[],[]
 		for i in range(len(self.gnum)):
 			self.njind.append(0)
-			self.nkind.append(0) 
-			self.nlind.append(0) 
+			self.nkind.append(0)
+			self.nlind.append(0)
               		self.ngrid,self.njind[i],self.nkind[i],self.nlind[i],self.nq,self.nqc,\
               		self.refmach,self.alpha,self.rey,self.time,self.gaminf,self.tinf, \
-              		self.beta,self.fsmach,ioerr = readheader(self.qfile,self.gnum[i])	
+              		self.beta,self.fsmach,ioerr = readheader(self.qfile,self.gnum[i])
 	      	if ioerr:
 			self.newq = False
 	   elif self.filetype == 'diff' or self.filetype == 'LM_quant':
-	      self.njind,self.nkind,self.nq,ioerr = readdiffhead(self.qfile)
-	      self.Q,ioerr = readdiffq(self.qfile,self.njind,self.nkind,self.nq,self.selvar)
-	     
-	      self.nlind = 3 #Assuming we have a 2-D grid here 
+	      self.njind, self.nkind, self.nlind, self.Q = [0],[0],[3], [0]
+	      self.njind[0],self.nkind[0],self.nq,ioerr = readdiffhead(self.qfile)
+              print self.njind, self.nkind
+              if self.filetype == 'diff':
+                  self.nq = 4
+	      self.Q[0],ioerr = readdiffq(self.qfile,self.njind[0],self.nkind[0],self.nq,self.selvar)
 	      self.refmach  = 99999
 	      self.alpha = 9999
 	      self.rey   = 9999
 	      self.ngrid = 1
 	      if ioerr:
 		      self.newq = False
-	   self.check_max() 
-           self.get_c_plane(self)                   
+	   self.check_max()
+           self.get_c_plane(self)
 	# If we need to reload the grid coordinates
         if (self.newgrid):
 		self.X, self.Y = [],[]
@@ -532,7 +534,7 @@ class GraphFrame(wx.Frame):
 				ny = self.nlind[i]
 			if (self.cp == 1):
 				nx = self.njind[i]
-				ny = self.nkind[i]  
+				ny = self.nkind[i]
         		self.X[i], self.Y[i],ioerr = getgridcords( self.grid,self.gnum[i],self.njind[i],
                         	                         	   self.nkind[i],self.nlind[i],self.cp,
                                 	                 	   self.cpn,nx,ny )
@@ -540,23 +542,23 @@ class GraphFrame(wx.Frame):
 	       		self.gminx = np.amin(self.X[0])
                		self.gmaxx = np.amax(self.X[0])
                		self.gminy = np.amin(self.Y[0])
-               		self.gmaxy = np.amax(self.Y[0])                                      
+               		self.gmaxy = np.amax(self.Y[0])
               		self.j_index_control.manual_text2.SetValue(self.njind[0])
                		self.k_index_control.manual_text2.SetValue(self.nkind[0])
-               		self.l_index_control.manual_text2.SetValue(self.nlind[0])            
+               		self.l_index_control.manual_text2.SetValue(self.nlind[0])
                		self.j_index_control.manual_text1.SetValue(1)
                		self.k_index_control.manual_text1.SetValue(1)
-               		self.l_index_control.manual_text1.SetValue(1)            
+               		self.l_index_control.manual_text1.SetValue(1)
                		self.newgrid = False
 	    	else:
                		self.change = False
-         # If we need to reload a q-var 
+         # If we need to reload a q-var
         if (self.newq):
 	    if self.filetype == 'p3d':
                # Special case of velocity vectors
 	       	self.Q, self.u, self.v = [],[],[]
 	       	for i in range(len(self.gnum)):
-			
+
 	   		if (self.cp == 3):
 				nx = self.nkind[i]
 				ny = self.njind[i]
@@ -568,35 +570,35 @@ class GraphFrame(wx.Frame):
 				ny = self.nkind[i]
 		       	if self.selvar == 17:
 				self.u.append([])
-				self.v.append([]) 
+				self.v.append([])
 			      	qnum = self.selvar
 			       	self.u[i],self.v[i],ioerr = readqvel(self.qfile,self.ngrid,self.gnum[i],
                	                    			             self.njind[i],self.nkind[i],self.nlind[i],self.nq,
                  	        		                     nx,ny,self.cp,self.cpn)
                	       	else:
-			       	qnum = self.selvar  
+			       	qnum = self.selvar
 			# Get a Q-contour even if we are drawing velocity vectors
 			self.Q.append([])
 			self.Q[i],ioerr = readq(self.qfile,self.ngrid,self.gnum[i],self.njind[i],
-                        	       	       self.nkind[i],self.nlind[i],self.nq,qnum, 
-                              		       nx,ny,self.cp,self.cpn, 
+                        	       	       self.nkind[i],self.nlind[i],self.nq,qnum,
+                              		       nx,ny,self.cp,self.cpn,
                              		       self.gaminf,self.refmach)
 	       	if ioerr:
-			print "IO error!" 
-		   	self.change = False 
+			print "IO error!"
+		   	self.change = False
             self.newq = False
-	# 
+	#
         if (self.update == False or self.change == True):
             self.draw_update()
-        # If we are only changing the window             
+        # If we are only changing the window
         if (self.changebounds and not self.change):
             self.check_auto_axis(-0.25,1.25,-0.25,0.25)
             self.canvas2.draw()
-        self.update = True 
+        self.update = True
 
 
     def draw_update(self):
-        # Enable/Disable multi-grid selection 
+        # Enable/Disable multi-grid selection
         if (self.ngrid > 1):
             self.multgrd = True
             self.qfile_control.manual_text2.Enable(1)
@@ -612,7 +614,7 @@ class GraphFrame(wx.Frame):
         self.Nkind.SetLabel( ''.join(['    K-dim:  ', str(self.nkind[0])]) )
         self.Nlind.SetLabel( ''.join(['     L-dim:  ', str(self.nlind[0])]) )
 
-        # Allow user to lower indices that are plotted 
+        # Allow user to lower indices that are plotted
 	jmax = self.j_index_control.manual_text2.GetValue()
 	kmax = self.k_index_control.manual_text2.GetValue()
 	jmin = self.j_index_control.manual_text1.GetValue()
@@ -631,11 +633,11 @@ class GraphFrame(wx.Frame):
 			maxz = np.amax(self.Q[i])*scale
 			if (minz < self.minz) : self.minz = minz
 			if( maxz > self.maxz) : self.maxz = maxz
-        self.fig1.clf()	
+        self.fig1.clf()
         self.axes2 = self.fig1.add_subplot(111)
 	self.Qplt, self.Xplt, self.Yplt = [],[],[]
 	for i in range(len(self.gnum)):
-        	self.Qplt.append(self.Q[i])	
+        	self.Qplt.append(self.Q[i])
         	self.Xplt.append(self.X[i])
         	self.Yplt.append(self.Y[i])
         	if self.cb_stretch.IsChecked():
@@ -657,31 +659,31 @@ class GraphFrame(wx.Frame):
 		        	self.Qtemp.append(self.Qplt[i][k][kmin:kmax])
 	        	self.Xplt[i] = self.Xtemp
              		self.Yplt[i] = self.Ytemp
-	        	self.Qplt[i] = self.Qtemp 
+	        	self.Qplt[i] = self.Qtemp
 		# Get the range of the q-var for the contour plot
-		res = self.res_control.num 
+		res = self.res_control.num
        		sp = (self.maxz - self.minz)/res
         	if (self.minz >= 0):
             		levels = arange((self.minz-self.minz*.1),self.maxz*1.05, sp )
         	else:
-            		levels = arange((self.minz+self.minz*.1),self.maxz*1.05, sp )   
+            		levels = arange((self.minz+self.minz*.1),self.maxz*1.05, sp )
         	cplot = self.axes2.contourf(self.Xplt[i],self.Yplt[i],self.Qplt[i],levels)
-        
+
  		# check for velocity vectors
         	if (self.selvar == 17):
-      		      	self.axes2.quiver(self.Xplt[i][::6,::3],self.Yplt[i][::6,::3],         
+      		      	self.axes2.quiver(self.Xplt[i][::6,::3],self.Yplt[i][::6,::3],
                 	     	        self.u[i][::6,::3],self.v[i][::6,::3],scale=5.0,
                         		width=.001)
-        
-	self.cbar = self.fig1.colorbar(cplot,use_gridspec=True) 
+
+	self.cbar = self.fig1.colorbar(cplot,use_gridspec=True)
         # This is a pretty good default window size
         self.check_auto_axis(-0.25,1.25,-0.25,0.25)
         self.check_max()
         self.canvas2.draw()
-        
+
         if (self.cb_grid.IsChecked() and self.redrawgrid):
             self.show_grid()
-        
+
     def show_grid(self):
         if( self.cb_grid.IsChecked()):
 		for i in range(len(self.gnum)):
@@ -701,12 +703,12 @@ class GraphFrame(wx.Frame):
         self.ymin_control.value = self.ymin_control.manual_text.GetValue()
 
         # Since we are calling (-0.25,1.25,-0.25,0.25) as the default size
-        # make sure there will not be a bunch of blank space          
-        if (self.gminx > minx): minx = self.gminx 
-        if (self.gmaxx < maxx): maxx = self.gmaxx 
-        if (self.gminy > miny): miny = self.gminy 
-        if (self.gmaxy < maxy): maxy = self.gmaxy      
-        
+        # make sure there will not be a bunch of blank space
+        if (self.gminx > minx): minx = self.gminx
+        if (self.gmaxx < maxx): maxx = self.gmaxx
+        if (self.gminy > miny): miny = self.gminy
+        if (self.gmaxy < maxy): maxy = self.gmaxy
+
         if self.xmax_control.is_auto():
             xmax = maxx
         else:
@@ -728,48 +730,49 @@ class GraphFrame(wx.Frame):
         self.axes2.set_ybound(lower=ymin, upper=ymax)
 
 #   Make sure we are not going to input something beyond the dimensions of
-#   the grid 
+#   the grid
     def check_max(self):
+       print self.nlind, self.njind
        if self.j_index_control.manual_text1.GetValue() > self.njind[0]:
-          self.j_index_control.manual_text1.SetValue(self.njind[0]) 
+          self.j_index_control.manual_text1.SetValue(self.njind[0])
        if self.j_index_control.manual_text2.GetValue() > self.njind[0]:
            self.j_index_control.manual_text2.SetValue(self.njind[0])
        if self.k_index_control.manual_text1.GetValue() > self.nkind[0]:
-           self.k_index_control.manual_text1.SetValue(self.nkind[0]) 
+           self.k_index_control.manual_text1.SetValue(self.nkind[0])
        if self.k_index_control.manual_text2.GetValue() > self.nkind[0]:
-           self.k_index_control.manual_text2.SetValue(self.nkind[0]) 
+           self.k_index_control.manual_text2.SetValue(self.nkind[0])
        if self.l_index_control.manual_text1.GetValue() > self.nlind[0]:
-           self.l_index_control.manual_text1.SetValue(self.nlind[0]) 
+           self.l_index_control.manual_text1.SetValue(self.nlind[0])
        if self.l_index_control.manual_text2.GetValue() > self.nlind[0]:
-           self.l_index_control.manual_text2.SetValue(self.nlind[0]) 
+           self.l_index_control.manual_text2.SetValue(self.nlind[0])
 
-     
+
 
     def on_update_update_button(self, event):
         label = "Update" if self.update else "Draw"
         self.update_button.SetLabel(label)
 
-   
-    def onKeyPress(self,event): 
+
+    def onKeyPress(self,event):
         if event.GetKeyCode() == wx.WXK_RETURN:
             self.on_update_button(event)
 
-    def onscroll( self, event ):        
-        scale = 1.15 # How fast we want to zoom in and out 
+    def onscroll( self, event ):
+        scale = 1.15 # How fast we want to zoom in and out
         if event.button == 'down':
             factor = 1/scale
         elif event.button == 'up':
             factor = scale
-            
+
         curr_xlim = self.axes2.get_xlim()
         curr_ylim = self.axes2.get_ylim()
-    
+
         new_width = (curr_xlim[1]-curr_xlim[0])*factor
         new_height= (curr_ylim[1]-curr_ylim[0])*factor
-    
+
         relx = (curr_xlim[1]-event.xdata)/(curr_xlim[1]-curr_xlim[0])
         rely = (curr_ylim[1]-event.ydata)/(curr_ylim[1]-curr_ylim[0])
-    
+
         self.axes2.set_xlim([event.xdata-new_width*(1-relx),
                     event.xdata+new_width*(relx)])
         self.axes2.set_ylim([event.ydata-new_height*(1-rely),
@@ -778,7 +781,7 @@ class GraphFrame(wx.Frame):
 
 
     def set_curlim(self, event):
-    	curr_xlim = self.axes2.get_xlim() 
+    	curr_xlim = self.axes2.get_xlim()
         curr_ylim = self.axes2.get_ylim()
 	self.xmax_control.manual_text.SetValue(str(curr_xlim[1]))
 	self.xmin_control.manual_text.SetValue(str(curr_xlim[0]))
@@ -798,14 +801,14 @@ class GraphFrame(wx.Frame):
 
     def save_current(self, event):
         if self.numsaved == 0:
-            self.saved_views.Clear() 
-        self.numsaved = self.numsaved + 1 
+            self.saved_views.Clear()
+        self.numsaved = self.numsaved + 1
         curname = ''.join(['Saved_Frame_', str(self.numsaved)])
         self.saved_views.Append(curname)
         self.saved_views.SetValue(curname)
         viewdict = {}
         self.set_curlim(event)
-        # load all the current attributes into a dictionary 
+        # load all the current attributes into a dictionary
         viewdict['jmin']  = self.j_index_control.manual_text1.GetValue()
         viewdict['jmax']  = self.j_index_control.manual_text2.GetValue()
         viewdict['kmin']  = self.k_index_control.manual_text1.GetValue()
@@ -833,24 +836,24 @@ class GraphFrame(wx.Frame):
         viewdict['ksf']   = self.k_str.GetValue()
         viewdict['res']   = self.res_control.GetValue()
         viewdict['lgad']  = self.legend_adj.GetValue()
-        viewdict['filet'] = self.filesel.GetValue()     
+        viewdict['filet'] = self.filesel.GetValue()
         viewdict['showg'] = self.cb_grid.GetValue()
         viewdict['cpt']   = self.cp
-        viewdict['cpnt']  = self.cpn 
+        viewdict['cpnt']  = self.cpn
         self.viewhist[curname] = viewdict
-        
+
 
     def load_view(self, event):
-        curname  = self.saved_views.GetValue() 
-        viewdict = self.viewhist[curname]        
+        curname  = self.saved_views.GetValue()
+        viewdict = self.viewhist[curname]
         self.j_index_control.manual_text1.SetValue(viewdict['jmin'])
         self.j_index_control.manual_text2.SetValue(viewdict['jmax'])
         self.k_index_control.manual_text1.SetValue(viewdict['kmin'])
         self.k_index_control.manual_text2.SetValue(viewdict['kmax'])
         self.l_index_control.manual_text1.SetValue(viewdict['lmin'])
-        self.l_index_control.manual_text2.SetValue(viewdict['lmax'])        
+        self.l_index_control.manual_text2.SetValue(viewdict['lmax'])
         self.qfile_control.manual_text.SetValue(viewdict['qfile'])
-        self.qfile_control.manual_text2.SetValue(viewdict['gnum'])        
+        self.qfile_control.manual_text2.SetValue(viewdict['gnum'])
         self.grid_file_control.manual_text.SetValue(viewdict['gfile'])
         self.selectq_control.num = viewdict['pvar']
         self.xmin_control.radio_manual.SetValue(viewdict['axmin'])
@@ -869,19 +872,19 @@ class GraphFrame(wx.Frame):
         self.legend_adj.SetValue(viewdict['lgad'])
         self.filesel.SetValue(viewdict['filet'])
         self.cb_grid.SetValue(viewdict['showg'])
-        self.cp  = viewdict['cpt'] 
+        self.cp  = viewdict['cpt']
         self.cpn = viewdict['cpnt']
         self.selectq_control.cb.SetStringSelection(viewdict['vname'])
         self.on_update_button(event)
         if self.cb_grid.IsChecked():
             self.show_grid()
 
-    
+
     def chg_filetype(self,event):
-	if (self.filesel.GetValue() == 'diff' or 
+	if (self.filesel.GetValue() == 'diff' or
 	    self.filesel.GetValue() == 'LM_quant' ):
 		self.selectq_control.LMselect(event)
-        else: 
+        else:
 		self.selectq_control.ptdselect(event)
 
 # Boundary Layer functions ------------------------------------------------
@@ -900,7 +903,7 @@ class GraphFrame(wx.Frame):
 
 
     def update_bl_mom(self,X,Y,U,maxk,jcur):
-        kmax = self.Bl_kplane.GetValue() 
+        kmax = self.Bl_kplane.GetValue()
         indmax,umax = 0,0
         hitmax = True
         for i in range(0,maxk):
@@ -931,7 +934,7 @@ class GraphFrame(wx.Frame):
         H     = dispth/momth
 
 ########################################################################
-        momthr = momth*self.rey 
+        momthr = momth*self.rey
         shape = round(H,4)
         self.shape_label.SetLabel( ''.join(['H (Shape Factor) =   ', str(shape)]) )
         momthick = round(momthr,8)
@@ -948,7 +951,7 @@ class GraphFrame(wx.Frame):
             self.axes3.set_xlabel("$ u/U_e $")
             self.axes3.set_ylabel("$ z/c $")
             self.axes3.set_xbound(lower=-.1, upper=1.3)
-        
+
         self.fig2.subplots_adjust(wspace=0.1)
         self.fig2.subplots_adjust(left=0.2)
         self.fig2.subplots_adjust(right=0.95)
@@ -961,7 +964,7 @@ class GraphFrame(wx.Frame):
         self.canvas2.draw()
         # remove the most recent addition to the axes
         del self.axes2.lines[-1]
-     
+
 
 
     def on_bl_button(self,event):
@@ -982,14 +985,14 @@ class GraphFrame(wx.Frame):
 		nx = self.njind[0]
 		ny = self.nkind[0]
         self.blQ,ioerr = readq(self.qfile,self.ngrid, gnum[0],self.njind[0],
-                               self.nkind[0],self.nlind[0],self.nq,qnum, 
+                               self.nkind[0],self.nlind[0],self.nq,qnum,
                                nx,ny,self.cp,self.cpn,
                                self.gaminf,self.refmach)
 
         if not ioerr:
             u = self.blQ[self.jcur][:]
             x = self.X[0][self.jcur][:]
-            y = self.Y[0][self.jcur][:]              
+            y = self.Y[0][self.jcur][:]
             xoverc = round(x[0],5)
             self.x_over_c.SetLabel( ''.join(['x/c =   ', str(xoverc)]) )
             self.update_bl_mom(x,y,u,(self.nkind[0]-1),(self.jcur))
@@ -1049,6 +1052,3 @@ if __name__ == '__main__':
     app.frame = GraphFrame()
     app.frame.Show()
     app.MainLoop()
-
-
-

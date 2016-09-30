@@ -219,6 +219,8 @@
       
       ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
+      read(1,err=10,end=10)
+      read(1,err=10,end=10)
       read(1,err=10,end=10) nj,nk,nq
       close(1)
       goto 20
@@ -240,7 +242,8 @@
       ioerr = .false.
       open(1,file=qfile,status='OLD',form='UNFORMATTED') 
       read(1,err=10,end=10) ! skip header 
-!     Actually read the q array for the desired grid 
+      read(1,err=10,end=10) ! skip header 
+      read(1,err=10,end=10) ! skip header 
       read(1,err=10,end=10) qt
       qout = qt(:,:,cq) 
       close(1)
